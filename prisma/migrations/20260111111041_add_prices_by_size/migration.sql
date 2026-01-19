@@ -1,0 +1,2 @@
+-- Empty migration
+-- This migration already exists in the database

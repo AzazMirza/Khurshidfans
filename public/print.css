@@ -1,0 +1,30 @@
+@media print {
+  body { 
+    -webkit-print-color-adjust: exact; 
+    /* color-adjust: exact;  */
+    print-color-adjust: exact; /* Standard property */
+  }
+  button, .no-print { display: none !important; }
+    .print-area button {
+    display: none !important;
+  }
+  .print-area {
+    display: block !important;
+  }
+  table { font-size: 12px; }
+}
+
+
+  body { 
+    -webkit-print-color-adjust: exact; 
+    /* color-adjust: exact;  */
+    print-color-adjust: exact; /* Standard property */
+  }
+  button, .no-print { display: none !important; }
+    .print-area button {
+    display: none !important;
+  }
+  .print-area {
+    display: block !important;
+  }
+  table { font-size: 12px; }

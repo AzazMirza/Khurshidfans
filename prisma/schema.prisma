@@ -1,0 +1,162 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int             @id @default(autoincrement())
+  name           String
+  email          String?         @unique
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  password       String
+  phone          String?         @unique
+  cartItems      CartItem[]
+  orders         Order[]
+  productReviews ProductReview[]
+}
+
+model Product {
+  id             Int             @id @default(autoincrement())
+  name           String
+  stock          Int
+  rating         Float?          @default(5)
+  description    String?
+  sku            String
+  image          String?
+  images         String[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  category       String[]
+  color          String[]
+  pricesByColor  Json?
+  price          Int
+  size           String[]
+  pricesBySize   Json?
+  cartItems      CartItem[]
+  orderItems     OrderItem[]
+  productDetails ProductDetails?
+  reviews        ProductReview[]
+}
+
+model ProductDetails {
+  id               Int      @id @default(autoincrement())
+  productId        Int      @unique
+  motor            String?
+  blades           String?
+  speedLevels      String?
+  remote           String?
+  timer            String?
+  oscillation      String?
+  noiseLevel       String?
+  dimensions       String?
+  warranty         String?
+  motorType        String?
+  height           String?
+  bladeDiameter    String?
+  baseDiameter     String?
+  weight           String?
+  powerConsumption String?
+  airFlow          String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  product          Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id             Int         @id @default(autoincrement())
+  userId         Int?
+  totalAmount    Int         @default(0)
+  status         OrderStatus @default(PENDING)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  guestId        String?
+  phoneNumber    String?
+  firstName      String?
+  lastName       String?
+  email          String?
+  paymentMethod  String?
+  shippingMethod String?
+  city           String?
+  country        String?
+  stateProvince  String?
+  zipCode        String?
+  street         String?
+  user           User?       @relation(fields: [userId], references: [id])
+  orderItems     OrderItem[]
+
+  @@index([userId])
+  @@index([guestId])
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int
+  price     Float
+  color     String?
+  size      String?
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([orderId, productId])
+}
+
+model CartItem {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  productId Int
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  price     Int?
+  color     String?
+  guestId   String?
+  size      String?
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id])
+}
+
+model ProductReview {
+  id          Int      @id @default(autoincrement())
+  reviewTitle String
+  reviewDec   String
+  productId   Int
+  rating      Int
+  createdAt   DateTime @default(now())
+  userId      Int
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ContactForm {
+  id        Int      @id @default(autoincrement())
+  firstName String
+  lastName  String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Theme {
+  id        Int      @id @default(1)
+  pr        String
+  se        String
+  tx        String
+  bg        String
+  updatedAt DateTime @updatedAt
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  COMPLETED
+  CANCELLED
+}

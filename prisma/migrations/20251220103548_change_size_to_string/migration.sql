@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "CartItem" ALTER COLUMN "size" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "OrderItem" ALTER COLUMN "size" SET DATA TYPE TEXT;
