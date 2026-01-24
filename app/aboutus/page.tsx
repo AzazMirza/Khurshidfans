@@ -16,11 +16,11 @@ export default function CompanyValues() {
           <div className="mt-6 mb-12">
             <div className="text-6xl text-gray-800 mb-6">❝</div>
             <p className="text-xl md:text-2xl text-black font-medium max-w-3xl mx-auto">
-              "The goal isn’t to build a website, an app, or a company. The goal
-              is to change the world by giving people tools that make their
-              lives better and make them better people."
+              “May Allah have mercy on a person who is lenient when selling, lenient when buying, and lenient when seeking repayment.”
+              <br />   The Holy Prophet PBUH <br/>
+                |Sahih al-Bukhari 2076|
             </p>
-            <div className="mt-6 flex flex-row justify-center items-center">
+            {/* <div className="mt-6 flex flex-row justify-center items-center">
               <img
                 src="/images/kingmodel.png"
                 alt="CEO"
@@ -34,7 +34,7 @@ export default function CompanyValues() {
                   Founder & Creative Director
                 </p>
               </div>
-            </div>
+            </div> */}
           </div>
 
           <div
@@ -46,46 +46,51 @@ export default function CompanyValues() {
                             duration-300 ease-in-out">
             <h2 className="text-2xl font-bold text-white mb-2">Our Mission</h2>
             <p className="text-gray-100 max-w-2xl mx-auto">
-              To create digital experiences that elevate brands, empower users,
-              and inspire meaningful connections through thoughtful design and
-              innovative technology.
+              
+
+S.G.S Electrical Company was founded with a singular purpose to manufacture high quality fans with zero compromise on quality. From the very beginning profit maximization was never our primary objective. Our mission has always been to create lasting value through superior engineering, honest manufacturing, and an unwavering commitment to our customers.
+
+We have never approached our work by asking what the bare minimum might be. Instead, from day one, our focus has been on delivering the utmost level of quality and performance possible even when it requires us to invest more than what is commercially convenient. This philosophy defines who we are and continues to guide every product we create.
             </p>
           </div>
 
           <div>
             <h2 className="text-2xl font-bold mt-6 p-8 text-black">
-              Guiding Values
+              Our Core Ethos
             </h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 text-left ">
               <ValueCard
-                title="Purpose-Driven"
-                description="We believe in creating work that serves a meaningful purpose and delivers real value."
+                title="Quality without Compromise"
+                description="At S.G.S Electrical Company, quality is not a benchmark it is a responsibility. From materials selection to final assembly, every decision is guided by durability, reliability, and performance. We do not optimize for the lowest acceptable standard; we engineer for the highest possible one. This commitment has been embedded in our manufacturing philosophy since day one and continues to define every product that carries the Khurshid Fans name ."
               />
               <ValueCard
-                title="Continuous Growth"
-                description="We embrace learning and evolution as essential parts of our journey."
+                title=" Responsibility to the Customer"
+                description="Trust is earned through consistency. We view every customer relationship as a long-term commitment, not a transaction. Transparency in production, honest communication, and dependable after-sales support are integral to how we operate. Every fan we manufacture reflects our accountability to the people who choose to bring our products into their homes and workplaces."
               />
               <ValueCard
-                title="Client Partnership"
-                description="We see our clients as partners in a shared mission, not just customers."
+                title="Building the Industry, Not Just a Brand"
+                description="Our vision extends beyond individual success. By modernizing manufacturing practices through CNC machining, conveyor based production systems, and process standardization we have aimed to elevate industry benchmarks. Progress is meaningful only when it creates positive ripple effects, and we take pride in contributing to the gradual modernization of fan manufacturing across the country."
               />
               <ValueCard
-                title="Creative Excellence"
-                description="We push creative boundaries while maintaining the highest standards of quality."
+                title="Engineering-Led Innovation"
+                description="Innovation at Khurshid Fans is driven by engineering, not trends. Long before energy efficiency became an industry talking point, we invested in research, process optimization, and indigenous development. Our early adoption and local development of BLDC motor technology is a reflection of our belief that meaningful innovation must solve real problems, not merely follow market cycles.
+"
               />
               <ValueCard
-                title="Human-Centered"
-                description="We design for people first, putting human needs at the center of everything we create."
+                title="Developing People and Potential"
+                description=" We believe a strong industry is built on skilled people. Khurshid Fans is committed to bridging the gap between academia and industry by providing opportunities for learning, exposure, and practical growth. By investing in youth development, skill-building, and knowledge transfer, we aim to create clear pathways for talent to grow and contribute meaningfully within this country.
+"
               />
               <ValueCard
-                title="Sustainable Innovation"
-                description="We create solutions that are not only innovative today but sustainable for tomorrow’s challenges."
+                title="Integrity in Every Decision"
+                description=" Integrity governs how we manufacture, how we price, and how we engage with stakeholders. We choose clarity over shortcuts and responsibility over convenience. This principle has allowed us to build enduring relationships and a reputation rooted in trust, consistency, and accountability."
               />
             </div>
           </div>
         </section>
+         <Footer04Page />
       </div>
-      <Footer04Page />
+     
     </BubbleBackground>
   );
 }

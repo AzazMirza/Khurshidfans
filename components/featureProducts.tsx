@@ -40,8 +40,8 @@ export default function FeatureProducts() {
   }, []);
 
   return (
-    <section id="feature-products-section" className="mt-18">
-      <div className={`h-min p-2 md:p-3 lg:p-4 transition-opacity duration-700 ${inView ? "opacity-100" : "opacity-0"}`}>
+    <section id="feature-products-section" className="mt-24">
+      <div className={`h-min p-2 md:p-3  lg:p-4 transition-opacity duration-700 ${inView ? "opacity-100" : "opacity-0"}`}>
         {/* <h2 className="text-3xl md:text-4xl font-bold text-center mb-10">Feature Products</h2> */}
 
         {/* Swiper Coverflow */}

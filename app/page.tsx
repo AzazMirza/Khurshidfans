@@ -18,7 +18,7 @@ import CompanyProile from "./companyProile/page";
 
   export default async function HomePage() {
   return (
-    <div>
+    <div className="">
       <Navbar  />
       <FeatureProducts />
       <Hero05 />    

@@ -446,6 +446,12 @@ const shippingCost = totalQuantity > 3
       // Note: email is optional in your form
     );
   };
+  const handleEmptyCart = () => {
+  setCartItems([]); // If you store cart in state
+  // If you store in localStorage:
+  // localStorage.removeItem("cartItems");
+};
+
 
   if (isLoading) {
     return (
@@ -703,26 +709,41 @@ const shippingCost = totalQuantity > 3
                         ))}
                       </div>
 
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        <Link
-                          href="/catalogue"
-                          className="px-8 py-4 border-2 rounded-full font-semibold hover:bg-white/10 transition-all text-center"
-                          style={{ borderColor: theme.tx }}
-                        >
-                          Continue Shopping
-                        </Link>
-                        <button
-                          onClick={() => setStep("shipping")}
-                          className="flex-1 border-2 text-black px-8 py-4 rounded-full font-semibold hover:bg-gray-200 transition-all flex items-center justify-center"
-                          style={{
-                            borderColor: theme.se,
-                            backgroundColor: theme.pr + 80,
-                          }}
-                        >
-                          <span>Proceed to Shipping</span>
-                          <ChevronRight className="w-5 h-5 ml-2" />
-                        </button>
-                      </div>
+                     <div className="flex flex-col sm:flex-row gap-4">
+  <Link
+    href="/catalogue"
+    className="px-8 py-4 border-2 rounded-full font-semibold hover:bg-white/10 transition-all text-center"
+    style={{ borderColor: theme.tx }}
+  >
+    Continue Shopping
+  </Link>
+
+  {/* NEW BUTTON: Empty Cart */}
+ 
+
+  <button
+    onClick={() => setStep("shipping")}
+    className="flex-1 border-2 text-black px-8 py-4 rounded-full font-semibold hover:bg-gray-200 transition-all flex items-center justify-center"
+    style={{
+      borderColor: theme.se,
+      backgroundColor: theme.pr + 80,
+    }}
+  >
+    <span>Proceed to Shipping</span>
+    <ChevronRight className="w-5 h-5 ml-2" />
+  </button>
+   <button
+    onClick={handleEmptyCart}
+    className="border-2  border-black text-black px-8 py-4 rounded-full font-semibold hover:bg-gray-200 transition-all flex items-center justify-center"
+    style={{
+    
+      backgroundColor: theme.bg, // optional
+    }}
+  >
+    Empty Cart
+  </button>
+</div>
+
                     </>
                   )}
                 </div>

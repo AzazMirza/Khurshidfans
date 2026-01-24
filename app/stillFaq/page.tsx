@@ -4,50 +4,124 @@ import { useState } from "react";
 import Navbar from "@/components/ui/navbar";
 
 const faqData = {
-  Account: [
-    {
-      question: "How do I reset my password?",
-      answer:
-        "You can reset your password by clicking the 'Forgot Password' link on the login page. We'll email you instructions to create a new password.",
+  Difference: [
+     {
+      question: "What is the difference between AC/DC and Inverter fans?",
+      answer: (
+       <table className="w-full border border-gray-300  mt-4">
+  <thead>
+    <tr className="bg-gray-100">
+      <th className="border border-gray-300 px-4 py-3 text-left">Feature</th>
+      <th className="border border-gray-300 px-4 py-3 text-left">AC/DC Fans</th>
+      <th className="border border-gray-300 px-4 py-3 text-left">E-Force Inverter 30 Watt Fans</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td className="border border-gray-300 px-4 py-3">Motor Technology</td>
+      <td className="border border-gray-300 px-4 py-3">BLDC Motor</td>
+      <td className="border border-gray-300 px-4 py-3">BLDC Motor</td>
+    </tr>
+    <tr className="bg-white">
+      <td className="border border-gray-300 px-4 py-3">Power Input</td>
+      <td className="border border-gray-300 px-4 py-3">Dual Input (220V AC + Direct DC)</td>
+      <td className="border border-gray-300 px-4 py-3">AC Only</td>
+    </tr>
+    <tr className="bg-gray-50">
+      <td className="border border-gray-300 px-4 py-3">DC Support</td>
+      <td className="border border-gray-300 px-4 py-3">Yes (Battery / Solar Compatible)</td>
+      <td className="border border-gray-300 px-4 py-3">No</td>
+    </tr>
+    <tr className="bg-white">
+      <td className="border border-gray-300 px-4 py-3">Power Consumption</td>
+      <td className="border border-gray-300 px-4 py-3">Higher than 30W (varies by speed)</td>
+      <td className="border border-gray-300 px-4 py-3">Approximately 30 Watts</td>
+    </tr>
+    <tr className="bg-gray-50">
+      <td className="border border-gray-300 px-4 py-3">Energy Efficiency</td>
+      <td className="border border-gray-300 px-4 py-3">Efficient with flexible power options</td>
+      <td className="border border-gray-300 px-4 py-3">Ultra-low power consumption</td>
+    </tr>
+    <tr className="bg-white">
+      <td className="border border-gray-300 px-4 py-3">Airflow & RPM</td>
+      <td className="border border-gray-300 px-4 py-3">Higher maximum airflow and RPM</td>
+      <td className="border border-gray-300 px-4 py-3">Slightly lower airflow and RPM</td>
+    </tr>
+    <tr className="bg-gray-50">
+      <td className="border border-gray-300 px-4 py-3">Usage During Power Outage</td>
+      <td className="border border-gray-300 px-4 py-3">Yes (via DC source)</td>
+      <td className="border border-gray-300 px-4 py-3">No</td>
+    </tr>
+    <tr className="bg-white">
+      <td className="border border-gray-300 px-4 py-3">Best For</td>
+      <td className="border border-gray-300 px-4 py-3">Flexibility & higher performance</td>
+      <td className="border border-gray-300 px-4 py-3">Minimum electricity consumption</td>
+    </tr>
+  </tbody>
+</table>
+
+      ),
     },
     {
-      question: "Can I change my username?",
+      question: "How your fans is better than others ?",
       answer:
-        "Yes, you can change your username in your account settings. Note that if you change your username, your profile URL will also change.",
+        " Our fans are better because We use advanced BLDC motor technology, offer higher airflow and flexibility with AC/DC input (for AC and battery/solar), and still deliver excellent energy efficiency. ",
     },
-    {
-      question: "How do I delete my account?",
-      answer:
-        "You can request account deletion from your account settings page. Please note this action is permanent and all your data will be removed.",
-    },
+    // {
+    //   question: "How do I delete my account?",
+    //   answer:
+    //     "You can request account deletion from your account settings page. Please note this action is permanent and all your data will be removed.",
+    // },
   ],
-  Billing: [
+  Warranty: [
     {
-      question: "What payment methods do you accept?",
-      answer: "We accept credit cards, debit cards, and PayPal.",
+      question: "What warranty do our fans come with ?",
+      answer: "Our fans include a 2-year motor warranty and a 1-year PCB warranty.",
     },
     {
-      question: "Can I get a refund?",
+      question: "How can I claim my warranty ?",
+      
+      answer: <p> <span className="font-bold ">Customers can claim the warranty in the following ways: </span><br />
+
+1.  Through the original shop
+The warranty can be claimed at the shop where the fan was originally purchased. <br />
+
+2.  Through any authorized dealer
+Customers may also claim the warranty through any other authorized dealer of our brand.
+<br />
+
+3. By sending the product to the factory (Not recommended)
+Customers can send the fan or circuit to the factory for warranty service.
+However, this option is costly and may involve additional inconvenience.
+Therefore, we strongly recommend using the first two options for a faster and easier process.</p> 
+    },
+    {
+      question: "Can the PCB kit be repaired after the warranty expires ?",
       answer:
-        "Refunds are available within 14 days of purchase if the service has not been used.",
+        "Yes, in some cases the kit can be repaired if only a few components are damaged. However, if the entire circuit is burned or completely damaged, it cannot be repaired.",
+    },
+    {
+      question: "What are the delivery charges for claiming the warranty ?",
+      answer:
+        "There are no delivery charges from our side, but the customer is responsible for the shipping cost of sending the circuit or fan for repair",
     },
   ],
   Service: [
     {
       question: "How can I contact support?",
       answer:
-        "You can contact us through the form on this page or email support@example.com.",
+        "You can contact us through the form on this page or email us at info@khurshidfans.com",
     },
     {
       question: "What are your support hours?",
-      answer: "Our support team is available 24/7.",
+      answer: "Our support team is available 9 AM to 5 PM.",
     },
   ],
 };
 
 export default function FAQSection() {
-  const [activeTab, setActiveTab] = useState<"Account" | "Billing" | "Service">(
-    "Account"
+  const [activeTab, setActiveTab] = useState<"Difference" | "Warranty" | "Service">(
+    "Difference"
   );
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -75,7 +149,7 @@ export default function FAQSection() {
                 <button
                   key={tab}
                   onClick={() => {
-                    setActiveTab(tab as "Account" | "Billing" | "Service");
+                    setActiveTab(tab as "Difference" | "Warranty" | "Service");
                     setOpenIndex(null);
                   }}
                   className={`px-4 py-1 rounded-md cursor-pointer ${
