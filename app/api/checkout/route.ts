@@ -1,7 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
+import { generatePayFastPaymentData } from "@/lib/payfast";
 import nodemailer from "nodemailer";
 import { prisma } from "@/lib/prisma";
-
+import { POST as payment } from "@/app/api/payment/route";
+import { createPayFastCheckout } from "@/lib/checkout";
 /* ====== CORS ====== */
 
 const corsHeaders = {
@@ -14,216 +16,49 @@ export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }
 
-/* ====== POST ====== */
-
-// export async function POST(req: Request) {
-//   try {
-//     const {
-//       userId,
-//       guestId,
-//       email,
-//       street,
-//       city,
-//       stateProvince,
-//       zipCode,
-//       country,
-//       phoneNumber,
-//       firstName,
-//       lastName,
-//       paymentMethod,
-//       shippingMethod,
-//     } = await req.json();
-
-//     if (!userId && !guestId) {
-//       return NextResponse.json(
-//         { error: "Missing userId or guestId" },
-//         { status: 400, headers: corsHeaders }
-//       );
-//     }
-//     //  const address = `${street}, ${city}, ${stateProvince}, ${zipCode ?? ""}, ${country ?? ""}`;
-//     if (!email || !street || !city || !stateProvince || !phoneNumber) {
-//       return NextResponse.json(
-//         {
-//           error:
-//             "Email, street, city, stateProvince and phoneNumber are required",
-//         },
-//         { status: 400, headers: corsHeaders }
-//       );
-//     }
-
-//     /* ====== FETCH CART ITEMS ====== */
-
-//     const cartItems = await prisma.cartItem.findMany({
-//       where: userId ? { userId } : { guestId },
-//       include: { product: true },
-//     });
-
-//     if (cartItems.length === 0) {
-//       return NextResponse.json(
-//         { error: "Cart is empty" },
-//         { status: 400, headers: corsHeaders }
-//       );
-//     }
-
-//     /* ====== CALCULATE TOTAL ====== */
-
-//     const totalAmount = cartItems.reduce((sum, item) => {
-//       const price = item.product?.price ?? 0;
-//       return sum + price * item.quantity;
-//     }, 0);
-
-//     /* ====== CREATE ORDER ====== */
-
-//     const order = await prisma.order.create({
-//       data: {
-//         userId: userId || null,
-//         guestId: guestId || null,
-//         totalAmount,
-//         firstName,
-//         lastName,
-//         email,
-//         street,
-//         city,
-//         stateProvince,
-//         zipCode: zipCode || null,
-//         country: country || null,
-//         phoneNumber,
-//         paymentMethod,
-//         shippingMethod,
-//         orderItems: {
-//           create: cartItems.map((item) => ({
-//             productId: item.productId,
-//             quantity: item.quantity,
-//             size: item.size ?? null,
-//             color: item.color ?? null,
-//             price: item.product?.price ?? 0,
-//           })),
-//         },
-//       },
-//       include: {
-//         orderItems: {
-//           include: { product: true },
-//         },
-//       },
-//     });
-
-//     const orderId = order;
-
-//     /* ====== WHATSAPP MESSAGE ====== */
-
-//     const waMessage = `Send to confirm your order!
-//       Order ID: ${orderId}
-//       Name: ${firstName ?? ""} ${lastName ?? ""}
-//       Phone: ${phoneNumber}
-//       Payment Method: ${paymentMethod}
-//       Shipping Method: ${shippingMethod}
-//       Address: ${street}, ${city}, ${stateProvince}, ${country ?? ""}
-
-//       Total Amount: Rs. ${totalAmount}`;
-
-//     const waLink = `https://wa.me/923058491064?text=${encodeURIComponent(
-//       waMessage
-//     )}`;
-
-//     /* ====== CLEAR CART ====== */
-
-//     await prisma.cartItem.deleteMany({
-//       where: userId ? { userId } : { guestId },
-//     });
-
-//     /* ====== SEND EMAIL ====== */
-
-//     try {
-//       const transporter = nodemailer.createTransport({
-//         host: process.env.EMAIL_HOST,
-//         port: Number(process.env.EMAIL_PORT),
-//         secure: true,
-//         auth: {
-//           user: process.env.EMAIL_USER,
-//           pass: process.env.EMAIL_PASS,
-//         },
-//       });
-
-//       const emailHtml = `
-//         <h2>Order Confirmation - Khurshid Fans</h2>
-//         <p>Hi <strong>${firstName ?? ""} ${lastName ?? ""}</strong>,</p>
-//         <p>Thank you for your order.</p>
-
-//         <p><strong>Order ID:</strong> ${orderId}</p>
-//         <p><strong>Total Amount:</strong> Rs. ${totalAmount}</p>
-//         <p><strong>Phone:</strong> ${phoneNumber}</p>
-//         <p><strong>Payment Method:</strong> ${paymentMethod}</p>
-//         <p><strong>Shipping Method:</strong> ${shippingMethod}</p>
-//         <p><strong>Address:</strong> ${street}, ${city}, ${stateProvince},${country ?? ""}</p>
-
-//         <h3>Order Items</h3>
-//         <ul>
-//           ${order.orderItems
-//             .map(
-//               (item) => `
-//             <li>
-//               ${item.product?.name ?? "Product"}<br/>
-//               Qty: ${item.quantity}<br/>
-//               Size: ${item.size ?? "—"}<br/>
-//               Color: ${item.color ?? "—"}<br/>
-//               Price: Rs. ${item.price}
-//             </li>
-//           `
-//             )
-//             .join("")}
-//         </ul>
-//       `;
-
-//       await transporter.sendMail({
-//         from: `"Khurshid Fans" <${process.env.EMAIL_USER}>`,
-//         to: email,
-//         subject: `Order Confirmation - ${orderId}`,
-//         html: emailHtml,
-//       });
-//     } catch (emailError) {
-//       console.error("Email sending failed:", emailError);
-//     }
-
-//     /* ====== RESPONSE ====== */
-
-//     return NextResponse.json(
-//       {
-//         success: true,
-//         message: "Checkout successful",
-//         order,
-//         waLink,
-//       },
-//       { headers: corsHeaders }
-//     );
-//   } catch (error: any) {
-//     console.error("Checkout Error:", error);
-//     return NextResponse.json(
-//       { error: error.message || "Checkout failed" },
-//       { status: 500, headers: corsHeaders }
-//     );
-//   }
-// }
 
 /* ====== POST ====== */
 export async function POST(req: Request) {
   try {
-    const {
-      userId,
-      guestId,
-      email,
-      street,
-      city,
-      stateProvince,
-      zipCode,
-      country,
-      phoneNumber,
-      firstName,
-      lastName,
-      paymentMethod,
-      shippingMethod,
-    } = await req.json();
 
-    if (!userId && !guestId) {
+// Extract top-level fields
+const {
+  userId,
+  guestId,
+  customerEmail: email,
+  customerFirstName: firstName,
+  customerLastName: lastName,
+  phoneNumber,
+  paymentMethod,
+  shippingMethod,
+  shipping,
+  amount,
+} = await req.json();
+
+// Safely extract shipping details
+const shippingDetails = shipping || {};
+const {
+  street = null,
+  city = null,
+  stateProvince = null,
+  zipCode = null,
+  country = null,
+} = shippingDetails;
+
+// Now validate
+if (!userId && !guestId) {
+  return NextResponse.json({ error: "Missing userId or guestId" }, { status: 400, headers: corsHeaders });
+}
+
+if (!email || !street || !city || !stateProvince || !phoneNumber) {
+  console.log("Validation failed. Values:", { email, street, city, stateProvince, phoneNumber });
+  return NextResponse.json(
+    { error: "Email, street, city, stateProvince and phoneNumber are required" },
+    { status: 400, headers: corsHeaders }
+  );
+}
+
+if (!userId && !guestId) {
       return NextResponse.json(
         { error: "Missing userId or guestId" },
         { status: 400, headers: corsHeaders }
@@ -266,18 +101,21 @@ export async function POST(req: Request) {
       }, {})
     );
 
-    /* ====== CALCULATE TOTAL ====== */
-    // const totalAmount = mergedItems.reduce((sum, item) => {
-    //   const price = item.price ?? item.price ?? 0;
-    //   return sum + price * item.quantity;
-    // }, 0);
     const totalAmount = mergedItems.reduce((sum, item) => {
   const price = typeof item.price === "number" ? item.price : 0;
   return sum + price * item.quantity;
 }, 0);
 
+let paymentResponse;
+
+// ✅ Generate PayFast URL directly — same logic as /api/payment
+
+
+  console.log("Payment Response:", paymentResponse);
 
     /* ====== CREATE ORDER ====== */
+
+
     const order = await prisma.order.create({
       data: {
         userId: userId || null,
@@ -313,15 +151,31 @@ export async function POST(req: Request) {
 
     const orderId = order.id;
 
-    /* ====== WHATSAPP MESSAGE ====== */
-    const waMessage = `Send to confirm your order!
-Order ID: ${orderId}
-Name: ${firstName ?? ""} ${lastName ?? ""}
-Phone: ${phoneNumber}
-Payment Method: ${paymentMethod}
-Shipping Method: ${shippingMethod}
-Address: ${street}, ${city}, ${stateProvince}, ${country ?? ""}
-Total Amount: Rs. ${totalAmount}`;
+
+
+      const paymentFormData = await generatePayFastPaymentData({
+        amount: totalAmount,
+        email: email,
+        mobile: phoneNumber, // ← this is required!
+        orderId: order.id.toString(),
+        // item_name: "Order from Khurshid Fans",
+        itemDescription: "Order from Khurshid Fans",
+      });
+
+      if (!paymentFormData) {
+        throw new Error("Failed to generate PayFast URL");
+      }
+
+
+          /* ====== WHATSAPP MESSAGE ====== */
+          const waMessage = `Send to confirm your order!
+      Order ID: ${orderId}
+      Name: ${firstName ?? ""} ${lastName ?? ""}
+      Phone: ${phoneNumber}
+      Payment Method: ${paymentMethod}
+      Shipping Method: ${shippingMethod}
+      Address: ${street}, ${city}, ${stateProvince}, ${country ?? ""}
+      Total Amount: Rs. ${totalAmount}`;
 
     const waLink = `https://wa.me/923058491064?text=${encodeURIComponent(
       waMessage
@@ -345,34 +199,34 @@ Total Amount: Rs. ${totalAmount}`;
       });
 
       const emailHtml = `
-<h2>Order Confirmation - Khurshid Fans</h2>
-<p>Hi <strong>${firstName ?? ""} ${lastName ?? ""}</strong>,</p>
-<p>Thank you for your order.</p>
+        <h2>Order Confirmation - Khurshid Fans</h2>
+        <p>Hi <strong>${firstName ?? ""} ${lastName ?? ""}</strong>,</p>
+        <p>Thank you for your order.</p>
 
-<p><strong>Order ID:</strong> ${orderId}</p>
-<p><strong>Total Amount:</strong> Rs. ${totalAmount}</p>
-<p><strong>Phone:</strong> ${phoneNumber}</p>
-<p><strong>Payment Method:</strong> ${paymentMethod}</p>
-<p><strong>Shipping Method:</strong> ${shippingMethod}</p>
-<p><strong>Address:</strong> ${street}, ${city}, ${stateProvince},${country ?? ""}</p>
+        <p><strong>Order ID:</strong> ${orderId}</p>
+        <p><strong>Total Amount:</strong> Rs. ${totalAmount}</p>
+        <p><strong>Phone:</strong> ${phoneNumber}</p>
+        <p><strong>Payment Method:</strong> ${paymentMethod}</p>
+        <p><strong>Shipping Method:</strong> ${shippingMethod}</p>
+        <p><strong>Address:</strong> ${street}, ${city}, ${stateProvince},${country ?? ""}</p>
 
-<h3>Order Items</h3>
-<ul>
-${order.orderItems
-  .map(
-    (item) => `
-  <li>
-    ${item.product?.name ?? "Product"}<br/>
-    Qty: ${item.quantity}<br/>
-    Size: ${item.size ?? "—"}<br/>
-    Color: ${item.color ?? "—"}<br/>
-    Price: Rs. ${item.price}
-  </li>
-`
-  )
-  .join("")}
-</ul>
-`;
+        <h3>Order Items</h3>
+        <ul>
+        ${order.orderItems
+          .map(
+            (item) => `
+          <li>
+            ${item.product?.name ?? "Product"}<br/>
+            Qty: ${item.quantity}<br/>
+            Size: ${item.size ?? "—"}<br/>
+            Color: ${item.color ?? "—"}<br/>
+            Price: Rs. ${item.price}
+          </li>
+        `
+          )
+          .join("")}
+        </ul>
+        `;
 
       await transporter.sendMail({
         from: `"Khurshid Fans" <${process.env.EMAIL_USER}>`,
@@ -384,6 +238,9 @@ ${order.orderItems
       console.error("Email sending failed:", emailError);
     }
 
+    console.log("✅ About to return paymentFormData:", JSON.stringify(paymentFormData, null, 2));
+
+
     /* ====== RESPONSE ====== */
     return NextResponse.json(
       {
@@ -391,10 +248,16 @@ ${order.orderItems
         message: "Checkout successful",
         order,
         waLink,
+        paymentFormData,
       },
       { headers: corsHeaders }
     );
   } catch (error: any) {
+  console.error("💥 Checkout Error:");
+  console.error("Message:", error.message);
+  console.error("Stack:", error.stack);
+  console.error("Cause:", error.cause);
+
     console.error("Checkout Error:", error);
     return NextResponse.json(
       { error: error.message || "Checkout failed" },
@@ -402,8 +265,6 @@ ${order.orderItems
     );
   }
 }
-
-
 
 
 /* ====== GET ====== */

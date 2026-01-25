@@ -1,15 +1,16 @@
 
 // app/api/checkout/route.ts
 import { NextRequest } from 'next/server';
-import { generatePayFastPaymentUrl } from '@/lib/payfast';
+import { generatePayFastPaymentData } from '@/lib/payfast';
 import { NextResponse } from "next/server";
 // import nodemailer from "nodemailer";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
+  // return NextResponse.json({ success: true }, { status: 219 });
   try {
     const {
-      orderId,
+      // orderId,
       amount,
       itemName,
       customerEmail,
@@ -18,13 +19,13 @@ export async function POST(request: NextRequest) {
     } = await request.json();
 
     // Validate input
-    if (!orderId || !amount || !itemName || !customerEmail) {
+    if ( !amount || !itemName || !customerEmail) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     // Generate PayFast URL
-    const paymentUrl = generatePayFastPaymentUrl({
-      m_payment_id: orderId,
+    const paymentUrl = generatePayFastPaymentData({
+      // m_payment_id: orderId,
       amount: parseFloat(amount.toFixed(2)),
       item_name: itemName,
       name_first: customerFirstName,
