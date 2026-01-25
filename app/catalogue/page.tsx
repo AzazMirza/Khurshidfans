@@ -809,12 +809,12 @@ export  default  function ProductsCatalog() {
     {/* ----------------- */}
     <li className='ml-4'>
       <label
-        htmlFor="cat-AC 220V"
+        htmlFor="cat-AC 220 P"
         className={`
           flex items-center space-x-3 w-full p-3 rounded-lg cursor-pointer
           transition-all duration-200 ease-in-out
           ${
-            filters.categories.includes("AC 220V")
+            filters.categories.includes("AC 220 P")
               ? "bg-primary/30 border-2 border-primary/70 text-primary shadow-sm"
               : "bg-background border border-input hover:bg-muted/60 hover:border-muted-foreground/30"
           }
@@ -822,25 +822,25 @@ export  default  function ProductsCatalog() {
         `}
       >
         <Checkbox
-          id="cat-AC 220V"
-          checked={filters.categories.includes("AC 220V")}
+          id="cat-AC 220 P"
+          checked={filters.categories.includes("AC 220 P")}
           onCheckedChange={(checked) => {
             if (checked) {
               setFilters((prev) => ({
                 ...prev,
-                categories: [...prev.categories, "AC 220V"],
+                categories: [...prev.categories, "AC 220 P"],
               }));
             } else {
               setFilters((prev) => ({
                 ...prev,
-                categories: prev.categories.filter((c) => c !== "AC 220V"),
+                categories: prev.categories.filter((c) => c !== "AC 220 P"),
               }));
             }
           }}
           className={`
             h-5 w-5 rounded border
             ${
-              filters.categories.includes("AC 220V")
+              filters.categories.includes("AC 220 P")
                 ? "border-primary bg-primary text-background"
                 : "border-input bg-background hover:border-primary"
             }
@@ -1445,7 +1445,7 @@ export  default  function ProductsCatalog() {
 
       <div className="flex gap-6">
         {/* Desktop Sidebar */}
-        <div className="hidden md:block w-64 flex-shrink-0">
+        <div className="hidden md:block w-64 shrink-0">
           <FilterSidebar />
         </div>
 

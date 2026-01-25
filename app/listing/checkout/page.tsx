@@ -93,6 +93,7 @@ export default function CheckoutPage() {
   const cartItemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [orderId, setOrderId] = useState<number | null>(null);
   const [isFocused, setIsFocused] = useState("");
+  
 
   const [theme, setTheme] = useState({
     pr: "#009395",
@@ -100,6 +101,8 @@ export default function CheckoutPage() {
     tx: "#000000",
     bg: "#eeeeee",
   });
+
+  const [paymentFormData, setPaymentFormData] = useState<Record<string, string> | null>(null);
 
   useEffect(() => {
     // Simulate API fetch
@@ -263,7 +266,7 @@ const shippingCost = totalQuantity > 3
   // Payment methods
   const paymentMethods: PaymentMethod[] = [
     // DON NOT REMOVE
-    // { id: "credit", name: "Credit Card", type: "credit" },
+    { id: "credit", name: "Credit Card", type: "credit" },
     { id: "cash", name: "cash", type: "cash" },
     { id: "bankTransfer", name: "Bank Transfer", type: "bankTransfer" },
     // { id: "apple", name: "Apple Pay", type: "apple" },
@@ -344,12 +347,13 @@ const shippingCost = totalQuantity > 3
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step === "cart") {
       setStep("shipping");
     } else if (step === "shipping") {
       setStep("payment");
-    } else if (step === "payment") {
+    }
+     else if (step === "payment") {
       setIsProcessing(true);
 
       let userId: string | null = "";
@@ -357,7 +361,27 @@ const shippingCost = totalQuantity > 3
       let guestId: string | null = "";
       guestId = localStorage.getItem("guestId");
 
-      fetch(`/api/checkout`, {
+      try {
+
+const orderData = {
+  amount: total,
+  itemName: 'Khurshid Fan',
+  customerEmail: shipping.email,
+  customerFirstName: shipping.firstName,
+  customerLastName: shipping.lastName,
+  phoneNumber: shipping.phone,
+  street: shipping.street,
+  city: shipping.city,
+  stateProvince: shipping.stateProvince,
+  country: shipping.country,
+  zipCode: shipping.zipCode,
+};
+
+// POST to /api/payfast and get back HTML → display it
+
+// if (response.ok) {
+
+      const res = await fetch(`/api/checkout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -365,9 +389,9 @@ const shippingCost = totalQuantity > 3
         body: JSON.stringify({
           shippingMethod: selectedShipping,
           paymentMethod: selectedPayment,
-          cartItems: cartItems,
+          itemName: 'cartItems[0]',
           shipping: shipping,
-          email: shipping.email,
+          customerEmail: shipping.email,
           phoneNumber: shipping.phone,
           street: shipping.street,
           city: shipping.city,
@@ -375,26 +399,64 @@ const shippingCost = totalQuantity > 3
           zipCode: shipping.zipCode,
           country: shipping.country,
           paymentDetails: paymentDetails,
-          total: total,
+          amount: total,
           guestId: localStorage.getItem("guestId"),
           userId: localStorage.getItem("userId"),
-          firstName: shipping.firstName,
-          lastName: shipping.lastName,
+          customerFirstName: shipping.firstName,
+          customerLastName: shipping.lastName,
         }),
       })
-        .then((res) => res.json())
-        .then((res) => {
-          setOrderId(res.order.id);
-          console.log(res);
-          window.open(res.waLink, "_blank");
-        });
+      const data = await res.json();
 
-      // Simulate payment processing
-      setTimeout(() => {
-        setIsProcessing(false);
-        setStep("confirmation");
-      }, 2000);
+          if (data.success && data.paymentFormData) {
+      // ✅ Trigger auto-submit via state (see useEffect below)
+      setPaymentFormData(data.paymentFormData);
+    } else {
+      alert("Checkout failed: " + (data.error || "Unknown error"));
+      setIsProcessing(false);
     }
+    const ResponseData = await res.json();
+    console.log("Checkout Response:", ResponseData);
+    alert("Order Created Successfully. Order ID: " + ResponseData.order.id);
+    if ( ResponseData.ok && ResponseData.order.paymentMethod === "credit") {
+    const response = await fetch('/api/payfast', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(orderData),
+  });
+
+  if (response.ok) {
+    // Convert response to blob and open in same tab
+    const html = await response.text();
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    window.location.href = url; // This loads the HTML page with auto-submit form
+  } else {
+    console.log('Payment initialization failed', response.statusText);
+    alert('Failed to initialize payment');
+  }           
+ }
+
+  // }
+
+      // if (data.paymentFormData) {
+      //   // ✅ REDIRECT TO PAYFAST (not WhatsApp!)
+      //   window.location.href = data.paymentFormData;
+      // } else {
+      //   alert("Failed to create payment session");
+      //   setIsProcessing(false);
+      // }
+          }
+        // }
+           catch (err) {
+      console.error(err);
+      alert("Trying to create Payment.. ");
+      setIsProcessing(false);
+    }
+  }
+
+  
+
   };
 
   const handleBack = () => {
@@ -425,14 +487,48 @@ const shippingCost = totalQuantity > 3
     );
   };
 
-  // useEffect(() => {
-  //   // Safe because useEffect always runs after mount
-  //   const stored = localStorage.getItem("theme");
-  //   if (stored) {
-  //     setTheme(JSON.parse(stored));
-  //   }
-  // }, []);
-  // Validation: required fields must be non-empty (and trimmed)
+  useEffect(() => {
+  if (paymentFormData) {
+    // Create form
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'https://ipguat.apps.net.pk/Ecommerce/api/Transaction/PostTransaction';
+
+    // Add hidden inputs
+    Object.entries(paymentFormData).forEach(([name, value]) => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      input.value = String(value);
+      form.appendChild(input);
+    });
+
+    // Submit
+    document.body.appendChild(form);
+    form.submit();
+  }
+}, [paymentFormData]);
+
+
+// useEffect(() => {
+//   if (paymentFormData) {
+//     const form = document.createElement('form');
+//     form.method = 'POST';
+//     form.action = 'https://ipguat.apps.net.pk/Ecommerce/api/Transaction/PostTransaction';
+
+//     Object.entries(paymentFormData).forEach(([name, value]) => {
+//       const input = document.createElement('input');
+//       input.type = 'hidden';
+//       input.name = name;
+//       input.value = String(value);
+//       form.appendChild(input);
+//     });
+
+//     document.body.appendChild(form);
+//     form.submit();
+//   }
+// }, [paymentFormData]);
+
   const isShippingFormValid = () => {
     return (
       shipping.phone.trim() !== "" &&
@@ -607,7 +703,7 @@ const shippingCost = totalQuantity > 3
                             style={{ backgroundColor: theme.pr + 80 }}
                           >
                             <div
-                              className="relative w-24 h-24 rounded-xl overflow-hidden p-2 mr-6 shrink-0 border-1"
+                              className="relative w-24 h-24 rounded-xl overflow-hidden p-2 mr-6 shrink-0 border"
                               style={{
                                 borderColor: theme.tx,
                                 backgroundColor: theme.bg + 80,
@@ -1191,7 +1287,7 @@ const shippingCost = totalQuantity > 3
 
                     {selectedPayment === "credit" && (
                       <>
-                        <div className="space-y-6">
+                        {/* <div className="space-y-6">
                           <h3 className="text-lg font-bold">
                             Credit Card Details
                           </h3>
@@ -1274,7 +1370,7 @@ const shippingCost = totalQuantity > 3
                               </div>
                             </div>
                           </div>
-                        </div>
+                        </div> */}
                         <div className="p-6 bg-linear-to-r from-cyan-600/20 to-purple-600/20 rounded-2xl border border-cyan-500/30">
                           <h3 className="font-bold mb-3 flex items-center">
                             <Shield className="w-5 h-5 mr-2 text-green-400" />
@@ -1349,7 +1445,7 @@ const shippingCost = totalQuantity > 3
                       </div>
                     </div>
 
-                    <div className="p-6 bg-gradient-to-r from-cyan-600/20 to-purple-600/20 rounded-2xl border border-cyan-500/30">
+                    <div className="p-6 bg-linear-to-r from-cyan-600/20 to-purple-600/20 rounded-2xl border border-cyan-500/30">
                       <h3 className="font-bold mb-2 flex items-center justify-center">
                         <Truck className="w-5 h-5 mr-2 text-cyan-400" />
                         Estimated Delivery

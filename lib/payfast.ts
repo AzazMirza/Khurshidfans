@@ -1,118 +1,209 @@
 // lib/payfast.ts
 
+import { NextRequest } from 'next/server';
+
 interface PayFastPayload {
-  // User-provided fields (never include merchant credentials here!)
-//   return_url: string;
-//   cancel_url: string;
-//   notify_url: string;
-  name_first: string;
-  name_last: string;
-  email_address: string;
-  m_payment_id: string; // Your order ID
+
+  // item_name: string;    // TXNDESC
+  amount: number;           // TXNAMT
+  email: string;            // CUSTOMER_EMAIL_ADDRESS
+  mobile: string;           // CUSTOMER_MOBILE_NO
+  orderId: string;          // BASKET_ID (your order ID)
+  itemDescription?: string; // TXNDESC
+}
+
+const PAYFAST_MERCHANT_ID = process.env.PAYFAST_MERCHANT_ID;
+const PAYFAST_SECURED_KEY = process.env.PAYFAST_SECURED_KEY;
+
+if (!PAYFAST_MERCHANT_ID || !PAYFAST_SECURED_KEY) {
+  throw new Error('Missing PayFast Pakistan credentials in environment variables');
+}
+
+/**
+ * Step 1: Get access token from PayFast Pakistan
+ */
+// async function getAccessToken(
+//   basketId: string,
+//   txnAmt: number,
+//   currencyCode = 'PKR'
+// ): Promise<string> {
+//   // Ensure environment variables are defined
+//   const MERCHANT_ID = process.env.PAYFAST_PAK_MERCHANT_ID;
+//   const SECURED_KEY = process.env.PAYFAST_PAK_SECURED_KEY;
+
+//   if (!MERCHANT_ID || !SECURED_KEY) {
+//     throw new Error(
+//       'Missing PAYFAST_PAK_MERCHANT_ID or PAYFAST_PAK_SECURED_KEY in environment variables'
+//     );
+//   }
+
+//   // ✅ Fixed URL: removed trailing spaces!
+//   const url = 'https://ipguat.apps.net.pk/Ecommerce/api/Transaction/GetAccessToken';
+
+//   // ✅ Build params safely (no undefined values)
+//   const params = new URLSearchParams();
+//   params.append('MERCHANT_ID', MERCHANT_ID);
+//   params.append('SECURED_KEY', SECURED_KEY);
+//   params.append('BASKET_ID', basketId);
+//   params.append('TXNAMT', txnAmt.toString());
+//   params.append('CURRENCY_CODE', currencyCode);
+
+//   try {
+//     const response = await fetch(url, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/x-www-form-urlencoded',
+//       },
+//       body: params,
+//     });
+
+//     if (!response.ok) {
+//       const errorText = await response.text().catch(() => 'Unknown error');
+//       throw new Error(
+//         `PayFast token request failed: ${response.status} ${response.statusText}. Body: ${errorText}`
+//       );
+//     }
+
+//     const data = await response.json().catch((err) => {
+//       throw new Error(`Invalid JSON response from PayFast: ${err.message}`);
+//     });
+
+//     if (!data?.ACCESS_TOKEN) {
+//       throw new Error(
+//         `PayFast did not return ACCESS_TOKEN. Response: ${JSON.stringify(data)}`
+//       );
+//     }
+
+//     return data.ACCESS_TOKEN;
+//   } catch (error: any) {
+//     console.error('❌ PayFast getAccessToken error:', error.message);
+//     throw error;
+//   }
+// }
+/**
+ * Step 2: Generate full transaction data for frontend form submission
+ */
+// export async function generatePayFastPaymentUrl(
+//   payload: PayFastPayload
+// ) {
+//   const { amount, email, mobile, orderId, itemDescription = 'Order Payment' } = payload;
+
+//   // Get token
+//   const token = await getAccessToken(orderId, amount);
+
+//   // Prepare form fields for frontend
+//   const formData = {
+//     MERCHANT_ID: PAYFAST_MERCHANT_ID,
+//     TOKEN: token,
+//     BASKET_ID: orderId,
+//     TXNAMT: amount.toString(),
+//     CURRENCY_CODE: 'PKR',
+//     ORDER_DATE: new Date().toISOString().slice(0, 19).replace('T', ' '),
+//     SUCCESS_URL: `${process.env.NEXT_PUBLIC_SITE_URL}/success?orderId=${orderId}`,
+//     FAILURE_URL: `${process.env.NEXT_PUBLIC_SITE_URL}/failure?orderId=${orderId}`,
+//     CHECKOUT_URL: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout`,
+//     CUSTOMER_EMAIL_ADDRESS: email,
+//     CUSTOMER_MOBILE_NO: mobile,
+//     TXNDESC: itemDescription,
+//     PROCCODE: '00',
+//     TRAN_TYPE: 'ECOMM_PURCHASE',
+//     VERSION: 'MERCHANT-CART-0.1',
+//     MERCHANT_NAME: 'Khurshid Fans',
+//     MERCHANT_USERAGENT: 'Next.js App',
+//   };
+
+//   return formData;
+// }
+
+
+// lib/payfast.ts
+
+interface PayFastPayload {
   amount: number;
-  item_name: string;
-  item_description?: string;
-  custom_str1?: string; // Optional: store JSON metadata
+  email: string;
+  mobile: string;
+  orderId: string;
+  itemDescription?: string;
 }
 
 /**
- * Generate PayFast payment URL with signature
+ * Generates payment form data for PayFast gateway.
+ * This initiates a server-side token request and returns
+ * all fields needed for frontend form submission.
  */
-export function generatePayFastPaymentUrl(
-  payload: PayFastPayload 
-): string {
-  const { 
-    PAYFAST_MERCHANT_ID,
-    PAYFAST_MERCHANT_KEY,
-    PAYFAST_PASSPHRASE,
-    PAYFAST_RETURN_URL,
-    PAYFAST_CANCEL_URL,
-    PAYFAST_ITN_URL
-  } = process.env;
+export async function generatePayFastPaymentData(
+  payload: PayFastPayload
+) {
+  const {
+    amount,
+    email,
+    mobile,
+    orderId,
+    itemDescription = 'Order Payment',
+  } = payload;
 
-  if (!PAYFAST_MERCHANT_ID || !PAYFAST_MERCHANT_KEY) {
-    throw new Error('PayFast credentials missing in .env');
+
+  const MERCHANT_ID = process.env.PAYFAST_MERCHANT_ID;
+  const SECURED_KEY = process.env.PAYFAST_SECURED_KEY;
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;
+
+  if (!MERCHANT_ID || !SECURED_KEY) {
+    throw new Error('Missing PAYFAST_MERCHANT_ID or PAYFAST_SECURED_KEY');
   }
 
-  // ✅ Build final payload with SECURE credentials
-  const payLoad = {
-    merchant_id: PAYFAST_MERCHANT_ID,
-    merchant_key: PAYFAST_MERCHANT_KEY,
-    return_url: PAYFAST_RETURN_URL!,
-    cancel_url: PAYFAST_CANCEL_URL!,
-    notify_url: PAYFAST_ITN_URL!,
-    ...payload, // User data merged AFTER credentials
+  // Get access token from PayFast
+  const token = await getAccessToken(orderId, amount);
+
+  return {
+    MERCHANT_ID,
+    TOKEN: token,
+    BASKET_ID: orderId,
+    TXNAMT: amount.toString(),
+    CURRENCY_CODE: 'PKR',
+    ORDER_DATE: new Date().toISOString().slice(0, 19).replace('T', ' '),
+    SUCCESS_URL: `${SITE_URL}/success?orderId=${orderId}`,
+    FAILURE_URL: `${SITE_URL}/failure?orderId=${orderId}`,
+    CHECKOUT_URL: `${SITE_URL}/checkout`,
+    CUSTOMER_EMAIL_ADDRESS: email,
+    CUSTOMER_MOBILE_NO: mobile,
+    TXNDESC: itemDescription,
+    PROCCODE: '00',
+    TRAN_TYPE: 'ECOMM_PURCHASE',
+    VERSION: 'MERCHANT-CART-0.1',
+    MERCHANT_NAME: 'Khurshid Fans',
+    MERCHANT_USERAGENT: 'Next.js App',
   };
+}
 
-  // Generate signature
-  const signature = generateSignature(payLoad, PAYFAST_PASSPHRASE);
+// --- Helper: Get Access Token ---
+async function getAccessToken(basketId: string, txnAmt: number): Promise<string> {
+  const MERCHANT_ID = process.env.PAYFAST_MERCHANT_ID!;
+  const SECURED_KEY = process.env.PAYFAST_SECURED_KEY!;
 
-  // Build query string
+  const url = 'https://ipguat.apps.net.pk/Ecommerce/api/Transaction/GetAccessToken'; // sandbox
+
   const params = new URLSearchParams();
-  Object.entries(payLoad).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
-      params.append(key, String(value));
-    }
+  params.append('MERCHANT_ID', MERCHANT_ID);
+  params.append('SECURED_KEY', SECURED_KEY);
+  params.append('BASKET_ID', basketId);
+  params.append('TXNAMT', txnAmt.toString());
+  params.append('CURRENCY_CODE', 'PKR');
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params,
   });
-  params.append('signature', signature);
 
-  return `https://www.payfast.co.za/eng/process?${params.toString()}`;
-}
-
-/**
- * Generate PayFast signature
- */
-function generateSignature(payload: Record<string, any>, passphrase?: string): string {
-  // Sort keys alphabetically
-  const sortedKeys = Object.keys(payload).sort();
-  
-  // Build string to sign
-  let stringToSign = '';
-  sortedKeys.forEach(key => {
-    const value = payload[key];
-    if (value !== undefined && value !== null && value !== '') {
-      stringToSign += `${key}=${encodeURIComponent(String(value))}&`;
-    }
-  });
-  stringToSign = stringToSign.slice(0, -1); // Remove trailing '&'
-
-  // Add passphrase if exists
-  if (passphrase) {
-    stringToSign += `&passphrase=${encodeURIComponent(passphrase)}`;
+  if (!response.ok) {
+    const text = await response.text().catch(() => 'Unknown error');
+    throw new Error(`Token request failed: ${response.status} – ${text}`);
   }
 
-  // Generate MD5 hash
-  const crypto = require('crypto');
-  return crypto.createHash('md5').update(stringToSign).digest('hex');
-}
-
-/**
- * Verify PayFast ITN signature
- */
-export function verifyPayFastSignature(
-  body: Record<string, any>,
-  expectedSignature: string,
-  passphrase?: string
-): boolean {
-  const { signature, ...payload } = body;
-
-  // Rebuild string to sign
-  const sortedKeys = Object.keys(payload).sort();
-  let stringToSign = '';
-  sortedKeys.forEach(key => {
-    const value = payload[key];
-    if (value !== undefined && value !== null && value !== '') {
-      stringToSign += `${key}=${encodeURIComponent(String(value))}&`;
-    }
-  });
-  stringToSign = stringToSign.slice(0, -1);
-
-  if (passphrase) {
-    stringToSign += `&passphrase=${encodeURIComponent(passphrase)}`;
+  const data = await response.json();
+  if (!data?.ACCESS_TOKEN) {
+    throw new Error('No ACCESS_TOKEN received from PayFast');
   }
 
-  const crypto = require('crypto');
-  const computedSignature = crypto.createHash('md5').update(stringToSign).digest('hex');
-  
-  return computedSignature === expectedSignature;
+  return data.ACCESS_TOKEN;
 }
