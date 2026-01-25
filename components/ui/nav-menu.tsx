@@ -105,6 +105,7 @@ export  const NavMenu = (props: ComponentProps<typeof NavigationMenu>) => (
               About Us
             </Link>
           </NavigationMenuLink>
+          
         </div>
       </NavigationMenuContent>
     </NavigationMenuItem>
@@ -135,6 +136,11 @@ export  const NavMenu = (props: ComponentProps<typeof NavigationMenu>) => (
     <NavigationMenuItem>
       <NavigationMenuLink asChild>
         <Link className="nav-links" href="#">Export Queries</Link>
+      </NavigationMenuLink>
+    </NavigationMenuItem>
+     <NavigationMenuItem>
+      <NavigationMenuLink asChild>
+        <Link className="nav-links" href="/joinus">Join Us</Link>
       </NavigationMenuLink>
     </NavigationMenuItem>
   </NavigationMenuList>

@@ -78,6 +78,7 @@ export const NavigationSheet = () => {
                     <Link href="#contact" className="link-underline"> Contact Us </Link>
                     <Link href="/stillFaq" className="link-underline"> FAQ </Link>
                     <Link href="/aboutus" className="link-underline"> About Us </Link>
+                    
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
@@ -95,6 +96,7 @@ export const NavigationSheet = () => {
               </Accordion>
 
           <Link href="#" className="link-underline font-medium" > Export Queries </Link>
+          
         </nav>
         <div className="mt-8 flex flex-col space-y-3">
           <Button
