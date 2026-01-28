@@ -80,49 +80,6 @@ export async function GET(req: Request) {
   }
 }
 
-
-
-
-// PUT → Update order status
-// export async function PUT(req: Request) {
-//   try {
-//     const { orderId, status } = await req.json();
-
-//     if (!orderId || !status)
-//       return NextResponse.json({ error: "Missing orderId or status" }, { status: 400, headers: corsHeaders });
-
-//     const validStatuses = ["PENDING", "PROCESSING", "SHIPPED", "COMPLETED", "CANCELLED"];
-//     if (!validStatuses.includes(status))
-//       return NextResponse.json({ error: "Invalid status" }, { status: 400, headers: corsHeaders });
-
-//     const updatedOrder = await prisma.order.update({
-//       where: { id: orderId },
-//       data: { status },
-//       include: {
-//         user: {
-//           select: { id: true, name: true, email: true, phone: true },
-//         },
-//         orderItems: {
-//           include: { product: true },
-//         },
-//       },
-//     });
-
-//     return NextResponse.json(
-//       { message: `Order status updated to ${status}`, order: updatedOrder },
-//       { status: 200, headers: corsHeaders }
-//     );
-//   } catch (error: any) {
-//     console.error("Error updating order status:", error);
-//     return NextResponse.json(
-//       { error: error.message || "Failed to update status" },
-//       { status: 500, headers: corsHeaders }
-//     );
-//   }
-// }
-
-
-
 export async function PUT(req: Request) {
   try {
     const { orderId, status } = await req.json();

@@ -202,7 +202,7 @@ export async function OPTIONS() {
 //       { status: 500, headers: corsHeaders }
 //     );
 //   }
-// }
+// } 
 
 /* ====== POST ====== */
 export async function POST(req: Request) {
@@ -221,6 +221,7 @@ export async function POST(req: Request) {
       lastName,
       paymentMethod,
       shippingMethod,
+      
     } = await req.json();
 
     if (!userId && !guestId) {
@@ -294,6 +295,7 @@ export async function POST(req: Request) {
         phoneNumber,
         paymentMethod,
         shippingMethod,
+        paymentStatus: "PENDING",
         orderItems: {
           create: mergedItems.map((item) => ({
             productId: item.productId,
