@@ -35,9 +35,9 @@ gsap.registerPlugin(ScrollTrigger);
 interface Review {
   id: number;
   userId: number;
-  userName: string;
+  reviewTitle: string;
   rating: number;
-  comment: string;
+  reviewDec: string;
   createdAt: string;
 }
 
@@ -51,7 +51,7 @@ export default function ProductDetail() {
   // const [color, setcolor] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
   const [isFavorite, setIsFavorite] = useState(false);
-  
+
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [relatedLoading, setRelatedLoading] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -67,103 +67,116 @@ export default function ProductDetail() {
     tx: "#000000",
     bg: "#eeeeee",
   });
-const [selectedSize, setSelectedSize] = useState<string>('');
-const [priceBySize, setPriceBySize] = useState<Record<string, number>>({});
+  const [selectedSize, setSelectedSize] = useState<string | number>("");
+  const [priceBySize, setPriceBySize] = useState<Record<string, number>>({});
+  const [rating, setRating] = useState<number>(0);
 
-useEffect(() => {
-  if (product) {
-    // Parse pricesBySize
-    const priceMap: Record<string, number> = {};
-    if (Array.isArray(product.pricesBySize)) {
-      product.pricesBySize.forEach(pair => {
-        if (typeof pair === 'string') {
-          const [size, priceStr] = pair.split(':');
-          priceMap[size] = Number(priceStr);
-        }
-      });
+ // Review form states
+  const [reviewTitle, setReviewTitle] = useState("");
+  const [reviewDec, setReviewDec] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+  useEffect(() => {
+    if (product) {
+      // Parse pricesBySize
+      const priceMap: Record<string, number> = {};
+      if (Array.isArray(product.pricesBySize)) {
+        product.pricesBySize.forEach((pair) => {
+          if (typeof pair === "string") {
+            const [size, priceStr] = pair.split(":");
+            priceMap[size] = Number(priceStr);
+          }
+        });
+      }
+      setPriceBySize(priceMap);
+
+      // Set default size
+      // const defaultSize = product.size?.[0] || '';
+      const defaultSize =
+        (Array.isArray(product.size) ? product.size[0] : product.size) || "";
+      setSelectedSize(defaultSize);
     }
-    setPriceBySize(priceMap);
+  }, [product]);
 
-    // Set default size
-    const defaultSize = product.size?.[0] || '';
-    setSelectedSize(defaultSize);
-  }
-}, [product]);
+  const currentPrice = product
+    ? (priceBySize[selectedSize] ?? product.price)
+    : 0;
 
-const currentPrice = product ? (priceBySize[selectedSize] ?? product.price) : 0;
+  // NEW FUNCTION: Fetch products in the same category
+  // const fetchRelatedProducts = async (category: string) => {
+  //   setRelatedLoading(true);
+  //   try {
+  //     const res = await fetch(`/api/products?category=${encodeURIComponent(category)}&limit=6`);
 
-// NEW FUNCTION: Fetch products in the same category
-// const fetchRelatedProducts = async (category: string) => {
-//   setRelatedLoading(true);
-//   try {
-//     const res = await fetch(`/api/products?category=${encodeURIComponent(category)}&limit=6`);
-    
-//     if (!res.ok) {
-//       throw new Error(`Failed to fetch related products: ${res.status} ${res.statusText}`);
-//     }
-    
-//     const data = await res.json();
-    
-//     // Extract products array from the response object
-//     const productsArray: Product[] = data.products || [];
-    
-//     // Filter out the current product and limit to 3
-//     const filteredProducts = productsArray
-//       .filter((p: Product) => p.id !== product?.id)
-//       .slice(0, 3);
-    
-//     setRelatedProducts(filteredProducts);
-//   } catch (error) {
-//     console.error("Failed to fetch related products:", error);
-//     setRelatedProducts([]); // Fallback to empty array
-//   } finally {
-//     setRelatedLoading(false);
-//   }
-// };
+  //     if (!res.ok) {
+  //       throw new Error(`Failed to fetch related products: ${res.status} ${res.statusText}`);
+  //     }
 
-// NEW FUNCTION: Fetch products in the same category
-const fetchRelatedProducts = async (category: string) => {
-  setRelatedLoading(true);
-  try {
-    const res = await fetch(`/api/products?category=${encodeURIComponent(category)}&limit=20`); // Increased limit for better randomness
-    
-    if (!res.ok) {
-      throw new Error(`Failed to fetch related products: ${res.status} ${res.statusText}`);
+  //     const data = await res.json();
+
+  //     // Extract products array from the response object
+  //     const productsArray: Product[] = data.products || [];
+
+  //     // Filter out the current product and limit to 3
+  //     const filteredProducts = productsArray
+  //       .filter((p: Product) => p.id !== product?.id)
+  //       .slice(0, 3);
+
+  //     setRelatedProducts(filteredProducts);
+  //   } catch (error) {
+  //     console.error("Failed to fetch related products:", error);
+  //     setRelatedProducts([]); // Fallback to empty array
+  //   } finally {
+  //     setRelatedLoading(false);
+  //   }
+  // };
+
+  // NEW FUNCTION: Fetch products in the same category
+  const fetchRelatedProducts = async (category: string) => {
+    setRelatedLoading(true);
+    try {
+      const res = await fetch(
+        `/api/products?category=${encodeURIComponent(category)}&limit=20`,
+      ); // Increased limit for better randomness
+
+      if (!res.ok) {
+        throw new Error(
+          `Failed to fetch related products: ${res.status} ${res.statusText}`,
+        );
+      }
+
+      const data = await res.json();
+
+      // Extract products array from the response object
+      let productsArray: Product[] = data.products || [];
+
+      // Filter out the current product
+      const filteredProducts = productsArray.filter(
+        (p: Product) => p.id !== product?.id,
+      );
+
+      // Shuffle the array and take up to 3 products
+      const shuffled = [...filteredProducts].sort(() => 0.5 - Math.random());
+      const randomProducts = shuffled.slice(0, 3);
+
+      setRelatedProducts(randomProducts);
+    } catch (error) {
+      console.error("Failed to fetch related products:", error);
+      setRelatedProducts([]); // Fallback to empty array
+    } finally {
+      setRelatedLoading(false);
     }
-    
-    const data = await res.json();
-    
-    // Extract products array from the response object
-    let productsArray: Product[] = data.products || [];
-    
-    // Filter out the current product
-    const filteredProducts = productsArray.filter((p: Product) => p.id !== product?.id);
-    
-    // Shuffle the array and take up to 3 products
-    const shuffled = [...filteredProducts].sort(() => 0.5 - Math.random());
-    const randomProducts = shuffled.slice(0, 3);
-    
-    setRelatedProducts(randomProducts);
-  } catch (error) {
-    console.error("Failed to fetch related products:", error);
-    setRelatedProducts([]); // Fallback to empty array
-  } finally {
-    setRelatedLoading(false);
-  }
-};
+  };
 
-      let size = 0;
+  let size = 0;
   useEffect(() => {
     // Simulate API fetch
     const fetchProduct = async () => {
       const id = window.location.pathname.split("/").pop();
       try {
         // In production, replace with:
-        const res = await fetch(
-          `/api/products/${id}`
-        );
+        const res = await fetch(`/api/products/${id}`);
         const data = await res.json();
-         if (data.category && data.category.length > 0) {
+        if (data.category && data.category.length > 0) {
           fetchRelatedProducts(data.category[0]);
         }
 
@@ -171,27 +184,27 @@ const fetchRelatedProducts = async (category: string) => {
           {
             id: 1,
             userId: 101,
-            userName: "Alex Johnson",
+            reviewTitle: "Alex Johnson",
             rating: 5,
-            comment:
+            reviewDec:
               "Absolutely incredible! The silence is what sold me - I can barely hear it running on the lowest setting. Build quality is exceptional.",
             createdAt: "2025-10-28T09:15:00Z",
           },
           {
             id: 2,
             userId: 102,
-            userName: "Maria Garcia",
+            reviewTitle: "Maria Garcia",
             rating: 5,
-            comment:
+            reviewDec:
               "Worth every penny. The remote control is intuitive and the design fits perfectly with my modern living room.",
             createdAt: "2025-10-22T14:30:00Z",
           },
           {
             id: 3,
             userId: 103,
-            userName: "David Kim",
+            reviewTitle: "David Kim",
             rating: 4,
-            comment:
+            reviewDec:
               "Great fan overall. The only minor issue is that the highest speed is a bit louder than advertised, but still much quieter than my old fan.",
             createdAt: "2025-10-15T18:45:00Z",
           },
@@ -336,7 +349,7 @@ const fetchRelatedProducts = async (category: string) => {
 
     // Apply cursor effects to interactive elements
     const interactiveElements = document.querySelectorAll(
-      "a, button, .group, .tab-item"
+      "a, button, .group, .tab-item",
     );
     interactiveElements.forEach((el) => {
       el.addEventListener("mouseenter", handleHover);
@@ -446,16 +459,81 @@ const fetchRelatedProducts = async (category: string) => {
   //   }
   // };
 
-
   const setFloatingRef = (index: number) => {
     return (el: HTMLDivElement | null) => {
       floatingElementsRef.current[index] = el;
     };
   };
 
+// ✅ New: Submit Review API
+  const handleSubmitReview = async () => {
+    if (!rating ) {
+      alert("Please fill all fields and select a rating.1");
+      return;
+    }
+    if (!reviewTitle) {
+      alert("Please fill all fields and select a rating.3");
+      return;
+    }
+
+    if (!reviewDec) {
+      alert("Please fill all fields and select a rating.2");
+      return;
+    }
+
+    
+
+    setSubmittingReview(true);
+
+    try {
+      const res = await fetch("/api/productReview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: product?.id,
+          rating,
+          reviewTitle: reviewTitle,
+          reviewDec: reviewDec,
+          createdAt: new Date().toISOString(),
+          // userId: 999,
+          // userName: "Guest",
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to submit review");
+
+      toast.success("Review submitted successfully!");
+      setReviews([
+        ...reviews,
+        {
+          id: data.id || reviews.length + 1,
+          userId: 999,
+          reviewTitle: reviewTitle,
+          rating,
+          reviewDec: reviewDec,
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+
+      setRating(0);
+      setReviewTitle("");
+      setReviewDec("");
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to submit review.");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+
   if (loading) {
     return (
-      <div style={{ backgroundColor: theme.pr }} className="min-h-screen flex items-center justify-center">
+      <div
+        style={{ backgroundColor: theme.pr }}
+        className="min-h-screen flex items-center justify-center"
+      >
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p style={{ color: theme.tx }}>Loading product details...</p>
@@ -466,7 +544,10 @@ const fetchRelatedProducts = async (category: string) => {
 
   if (!product) {
     return (
-      <div style={{ backgroundColor: theme.pr }} className="min-h-screen flex items-center justify-center">
+      <div
+        style={{ backgroundColor: theme.pr }}
+        className="min-h-screen flex items-center justify-center"
+      >
         <div className="text-center max-w-md">
           <div className="w-24 h-24 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
             <svg
@@ -474,7 +555,8 @@ const fetchRelatedProducts = async (category: string) => {
               className="w-12 h-12 text-red-500"
               fill="none"
               viewBox="0 0 24 24"
-              stroke="currentColor">
+              stroke="currentColor"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -489,7 +571,8 @@ const fetchRelatedProducts = async (category: string) => {
           </p>
           <Link
             href="/products"
-            className="inline-flex items-center text-cyan-400 hover:text-cyan-300 transition-colors">
+            className="inline-flex items-center text-cyan-400 hover:text-cyan-300 transition-colors"
+          >
             <ChevronRight className="w-4 h-4 mr-2 -rotate-180" />
             Back to Products
           </Link>
@@ -497,7 +580,6 @@ const fetchRelatedProducts = async (category: string) => {
       </div>
     );
   }
-
 
   // Calculate rating distribution
   const ratingDistribution = [0, 0, 0, 0, 0];
@@ -510,7 +592,7 @@ const fetchRelatedProducts = async (category: string) => {
     reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews || 0;
 
   return (
-    <div  className="min-h-screen overflow-hidden">
+    <div className="min-h-screen overflow-hidden">
       {/* <CartSidebar /> */}
       {/* Custom Cursor — unchanged */}
       <div
@@ -530,9 +612,7 @@ const fetchRelatedProducts = async (category: string) => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Product Images */}
             <div className="relative">
-              <div 
-                className="floating-product relative aspect-square rounded-3xl overflow-hidden border border-white/10 bg-linear-to-br from-[#fef200] to-[#009395]  "
-              >
+              <div className="floating-product relative aspect-square rounded-3xl overflow-hidden border border-white/10 bg-linear-to-br from-[#fef200] to-[#009395]  ">
                 <img
                   src={product.images[selectedImageIndex]}
                   alt={product.name}
@@ -544,21 +624,22 @@ const fetchRelatedProducts = async (category: string) => {
               </div>
 
               {/* Image Thumbnails */}
-              <div ref={galleryRef} className="flex gap-3 mt-6 overflow-scroll ">
+              <div
+                ref={galleryRef}
+                className="flex gap-3 mt-6 overflow-scroll "
+              >
                 {product.images.map((img, index) => (
                   <button
                     key={index}
                     className={`gallery-thumb relative w-20 h-20 rounded-xl overflow-hidden border-2 transition-all `}
                     style={{
-                        borderColor: 
-                      selectedImageIndex === index
-                        ? theme.pr
-                        : theme.tx+80,
-                        background: `linear-gradient(to bottom right, ${theme.se+80}, ${theme.pr+80}
-                        )`
-                    
+                      borderColor:
+                        selectedImageIndex === index ? theme.pr : theme.tx + 80,
+                      background: `linear-gradient(to bottom right, ${theme.se + 80}, ${theme.pr + 80}
+                        )`,
                     }}
-                    onClick={() => setSelectedImageIndex(index)}>
+                    onClick={() => setSelectedImageIndex(index)}
+                  >
                     <img
                       src={img}
                       alt={`${product.name} - View ${index + 1}`}
@@ -573,9 +654,7 @@ const fetchRelatedProducts = async (category: string) => {
             <div className="space-y-8">
               <div className="space-y-4">
                 <div className="flex items-center space-x-4">
-                  <span 
-                    className="px-3 py-1 text-xs font-medium rounded-full border bg-[#009395] text-white"
-                  >
+                  <span className="px-3 py-1 text-xs font-medium rounded-full border bg-[#009395] text-white">
                     Premium Collection
                   </span>
                   <div className="flex items-center">
@@ -597,8 +676,7 @@ const fetchRelatedProducts = async (category: string) => {
                 <h1 className="hero-text text-3xl md:text-5xl lg:text-6xl font-bold leading-tight">
                   {product.name}
                 </h1>
-                <p className="hero-text text-xl">
-                </p>
+                <p className="hero-text text-xl"></p>
               </div>
 
               <div className="hero-text space-y-6">
@@ -618,7 +696,13 @@ const fetchRelatedProducts = async (category: string) => {
                 <div className="max-w-4xl mx-auto p-4">
                   {/* <h1 className="text-3xl font-bold mb-6">{product.name}</h1> */}
                   {/* <AddToCartForm product={product}  onAddToCart={handleAdd} /> */}
-                  <AddToCartForm   product={{ ...product, price: currentPrice,size: selectedSize }} />
+                  <AddToCartForm
+                    product={{
+                      ...product,
+                      price: currentPrice,
+                      size: selectedSize,
+                    }}
+                  />
                 </div>
 
                 {/* Product Badges — unchanged (no dynamic theme colors) */}
@@ -647,26 +731,30 @@ const fetchRelatedProducts = async (category: string) => {
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex border-b border-white/10">
             {["overview", "specs", "reviews"].map((tab) => (
-            <button
-              key={tab}
-              className={`tab-item px-6 py-4 font-medium capitalize transition-colors relative mr-2`}
-              style={{
-                // Base text color
-                color: activeTab === tab ? "#009395" : '#000000',
-                backgroundColor: activeTab === tab ?"transparent" : "#009395"+33 ,
-                border: activeTab === tab ? "1px solid "+"#009395" : "1px solid transparent",
-                // Optional: add hover effect via JS if needed (or keep Tailwind for static parts)
-              }}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab}
-              {activeTab === tab && (
-                <div
-                  className="absolute bottom-0 left-0 w-full h-0.5"
-                  style={{ backgroundColor: theme.pr }} // or theme.tx if you want it dynamic
-                ></div>
-              )}
-            </button>
+              <button
+                key={tab}
+                className={`tab-item px-6 py-4 font-medium capitalize transition-colors relative mr-2`}
+                style={{
+                  // Base text color
+                  color: activeTab === tab ? "#009395" : "#000000",
+                  backgroundColor:
+                    activeTab === tab ? "transparent" : "#009395" + 33,
+                  border:
+                    activeTab === tab
+                      ? "1px solid " + "#009395"
+                      : "1px solid transparent",
+                  // Optional: add hover effect via JS if needed (or keep Tailwind for static parts)
+                }}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+                {activeTab === tab && (
+                  <div
+                    className="absolute bottom-0 left-0 w-full h-0.5"
+                    style={{ backgroundColor: theme.pr }} // or theme.tx if you want it dynamic
+                  ></div>
+                )}
+              </button>
             ))}
           </div>
 
@@ -686,8 +774,7 @@ const fetchRelatedProducts = async (category: string) => {
                       timeless design. Every component has been meticulously
                       crafted to deliver unparalleled performance in
                       whisper-quiet operation. */}
-                  {product.description}
-
+                      {product.description}
                     </p>
                   </div>
 
@@ -702,7 +789,7 @@ const fetchRelatedProducts = async (category: string) => {
                       {
                         icon: <Camera className="w-8 h-8" />,
                         title: "Sleek Modern Design",
-                        desc: `Crafted from premium aluminum and high-grade plastics, the ${product.name.charAt(0).toUpperCase() + product.name.slice(1)} is as beautiful as it is functional.`
+                        desc: `Crafted from premium aluminum and high-grade plastics, the ${product.name.charAt(0).toUpperCase() + product.name.slice(1)} is as beautiful as it is functional.`,
                       },
                       {
                         icon: <Play className="w-8 h-8" />,
@@ -718,8 +805,15 @@ const fetchRelatedProducts = async (category: string) => {
                       <div
                         key={i}
                         ref={setFloatingRef(i)}
-                        className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 transition-all group">
-                        <div style={{backgroundColor:theme.pr+33, color:theme.pr}} className={`w-12 h-12 rounded-xl  flex items-center justify-center mb-4  transition-colors`}>
+                        className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 transition-all group"
+                      >
+                        <div
+                          style={{
+                            backgroundColor: theme.pr + 33,
+                            color: theme.pr,
+                          }}
+                          className={`w-12 h-12 rounded-xl  flex items-center justify-center mb-4  transition-colors`}
+                        >
                           <div className="">{feature.icon}</div>
                         </div>
                         <h3 className="text-xl font-bold mb-2">
@@ -737,13 +831,13 @@ const fetchRelatedProducts = async (category: string) => {
                     ref={setFloatingRef(4)}
                     className="p-6 rounded-2xl "
                     style={{
-                      backgroundImage: `linear-gradient(to bottom right, ${theme.pr+33}, ${theme.se+33})`,
-                      
+                      backgroundImage: `linear-gradient(to bottom right, ${theme.pr + 33}, ${theme.se + 33})`,
                     }}
-                    >
+                  >
                     <h3 className="text-xl font-bold mb-4 flex items-center">
-                      <Award className="w-6 h-6 mr-2 " 
-                      style={{color:theme.pr}}
+                      <Award
+                        className="w-6 h-6 mr-2 "
+                        style={{ color: theme.pr }}
                       />
                       Award Winning Design
                     </h3>
@@ -755,34 +849,44 @@ const fetchRelatedProducts = async (category: string) => {
                       {[1, 2, 3].map((i) => (
                         <div
                           key={i}
-                          className="w-8 h-8 bg-white/20 rounded-lg"></div>
+                          className="w-8 h-8 bg-white/20 rounded-lg"
+                        ></div>
                       ))}
                     </div>
                   </div>
 
                   <div
                     ref={setFloatingRef(5)}
-                    className="p-6 rounded-2xl bg-white/5 border border-white/10">
+                    className="p-6 rounded-2xl bg-white/5 border border-white/10"
+                  >
                     <h3 className="text-xl font-bold mb-4">In the Box</h3>
                     <ul className="space-y-3 ">
                       <li className="flex items-start">
-                        <span className="w-2 h-2 rounded-full mt-2 mr-3 flex-shrink-0"
-                        style={{backgroundColor:theme.pr}}></span>
+                        <span
+                          className="w-2 h-2 rounded-full mt-2 mr-3 flex-shrink-0"
+                          style={{ backgroundColor: theme.pr }}
+                        ></span>
                         <span>1x Fan</span>
                       </li>
                       <li className="flex items-start">
-                        <span className="w-2 h-2 rounded-full mt-2 mr-3 flex-shrink-0"
-                        style={{backgroundColor:theme.pr}}></span>
+                        <span
+                          className="w-2 h-2 rounded-full mt-2 mr-3 flex-shrink-0"
+                          style={{ backgroundColor: theme.pr }}
+                        ></span>
                         <span>Premium Remote Control</span>
                       </li>
                       <li className="flex items-start">
-                        <span className="w-2 h-2 rounded-full mt-2 mr-3 flex-shrink-0"
-                        style={{backgroundColor:theme.pr}}></span>
+                        <span
+                          className="w-2 h-2 rounded-full mt-2 mr-3 flex-shrink-0"
+                          style={{ backgroundColor: theme.pr }}
+                        ></span>
                         <span>Mounting Hardware</span>
                       </li>
                       <li className="flex items-start">
-                        <span className="w-2 h-2 rounded-full mt-2 mr-3 flex-shrink-0"
-                        style={{backgroundColor:theme.pr}}></span>
+                        <span
+                          className="w-2 h-2 rounded-full mt-2 mr-3 flex-shrink-0"
+                          style={{ backgroundColor: theme.pr }}
+                        ></span>
                         <span>User Manual & Warranty Card</span>
                       </li>
                     </ul>
@@ -793,25 +897,27 @@ const fetchRelatedProducts = async (category: string) => {
 
             {activeTab === "specs" && (
               <div ref={specsRef} className="space-y-8">
-
                 {/* Technical Diagram */}
-                <div className={`mt-12 p-8 rounded-3xl  border`}
-                style={{backgroundColor:theme.pr+33 }}
+                <div
+                  className={`mt-12 p-8 rounded-3xl  border`}
+                  style={{ backgroundColor: theme.pr + 33 }}
                 >
                   <h3 className="text-2xl font-bold mb-6">
                     Technical Specifications
                   </h3>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div>
-                      <h4 className="text-lg font-semibold mb-4 "
-                      style={{color:theme.pr}}>
+                      <h4
+                        className="text-lg font-semibold mb-4 "
+                        style={{ color: theme.pr }}
+                      >
                         Performance
                       </h4>
-                      <div className="space-y-3"
-                      style={{color:theme.tx}}
-                      >
+                      <div className="space-y-3" style={{ color: theme.tx }}>
                         <div className="flex justify-between">
-                          <span className={`text-[${theme.tx}]`}>Max Airflow</span>
+                          <span className={`text-[${theme.tx}]`}>
+                            Max Airflow
+                          </span>
                           <span className="font-medium">450 CFM</span>
                         </div>
                         <div className="flex justify-between">
@@ -821,18 +927,24 @@ const fetchRelatedProducts = async (category: string) => {
                           <span className="font-medium">35W (Max)</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className={`text-[${theme.tx}]`}>Noise Level</span>
+                          <span className={`text-[${theme.tx}]`}>
+                            Noise Level
+                          </span>
                           <span className="font-medium">22-45 dB</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className={`text-[${theme.tx}]`}>Oscillation</span>
+                          <span className={`text-[${theme.tx}]`}>
+                            Oscillation
+                          </span>
                           <span className="font-medium">90° Horizontal</span>
                         </div>
                       </div>
                     </div>
                     <div>
-                      <h4 className="text-lg font-semibold mb-4 "
-                      style={{color:theme.pr}}>
+                      <h4
+                        className="text-lg font-semibold mb-4 "
+                        style={{ color: theme.pr }}
+                      >
                         Dimensions
                       </h4>
                       <div className="space-y-3">
@@ -841,11 +953,15 @@ const fetchRelatedProducts = async (category: string) => {
                           <span className="font-medium">120 cm</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className={`text-[${theme.tx}]`}>Blade Diameter</span>
+                          <span className={`text-[${theme.tx}]`}>
+                            Blade Diameter
+                          </span>
                           <span className="font-medium">42 cm</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className={`text-[${theme.tx}]`}>Base Diameter</span>
+                          <span className={`text-[${theme.tx}]`}>
+                            Base Diameter
+                          </span>
                           <span className="font-medium">38 cm</span>
                         </div>
                         <div className="flex justify-between">
@@ -866,10 +982,11 @@ const fetchRelatedProducts = async (category: string) => {
                   {reviews.map((review, i) => (
                     <div
                       key={review.id}
-                      className="review-card p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 transition-all">
+                      className="review-card p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 transition-all"
+                    >
                       <div className="flex justify-between items-start mb-4">
                         <div>
-                          <h4 className="font-bold">{review.userName}</h4>
+                          <h4 className="font-bold">{review.reviewTitle}</h4>
                           <div className="flex items-center mt-1">
                             {[...Array(5)].map((_, j) => (
                               <Star
@@ -881,21 +998,20 @@ const fetchRelatedProducts = async (category: string) => {
                                 }`}
                               />
                             ))}
-                            <span className={`ml-2 text-sm `}
-                            >
+                            <span className={`ml-2 text-sm `}>
                               {new Date(review.createdAt).toLocaleDateString()}
                             </span>
                           </div>
                         </div>
                       </div>
-                      <p className=" leading-relaxed">
-                        {review.comment}
-                      </p>
+                      <p className=" leading-relaxed">{review.reviewDec}</p>
                     </div>
                   ))}
                 </div>
 
                 {/* Add Review */}
+                
+
                 <div className="p-8 rounded-2xl bg-white/5 border border-white/10">
                   <h3 className="text-2xl font-bold mb-6">Write a Review</h3>
                   <div className="space-y-6">
@@ -907,36 +1023,56 @@ const fetchRelatedProducts = async (category: string) => {
                         {[1, 2, 3, 4, 5].map((star) => (
                           <button
                             key={star}
-                            className="w-10 h-10 flex items-center justify-center">
-                            <Star className={`w-6 h-6 text-[${theme.tx}] hover:text-yellow-400`} />
+                            type="button"
+                            onClick={() => setRating(star)}
+                            className="w-10 h-10 flex items-center justify-center"
+                          >
+                            <Star
+                              className="w-6 h-6 hover:text-yellow-400 transition-colors"
+                              style={{
+                                color: star <= rating ? "#FACC15" : theme.tx,
+                              }}
+                            />
                           </button>
                         ))}
                       </div>
                     </div>
+
                     <div>
                       <label className="block text-sm font-medium mb-2">
                         Review Title
                       </label>
                       <input
+                      value={reviewTitle}
+                      onChange={(e) => setReviewTitle(e.target.value)}
                         type="text"
                         className="w-full px-4 py-3 bg-white/5 border border-black rounded-lg focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                         placeholder="Summarize your experience"
                       />
                     </div>
+
                     <div>
                       <label className="block text-sm font-medium mb-2">
                         Your Review
                       </label>
                       <textarea
+                      value={reviewDec}
+                      onChange={(e) => setReviewDec(e.target.value)}
                         rows={4}
                         className="w-full px-4 py-3 bg-white/5 border border-black rounded-lg focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                        placeholder="Share details about your experience..."></textarea>
+                        placeholder="Share details about your experience..."
+                      ></textarea>
                     </div>
-                    <button className={`px-6 py-3  rounded-lg font-medium hover:bg-gray-200 transition-colors w-full sm:w-auto`}
-                    style={{backgroundColor: theme.pr}}
+
+                    {/* <button
+                      className="px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors w-full sm:w-auto"
+                      style={{ backgroundColor: theme.pr }}
                     >
                       Submit Review
-                    </button>
+                    </button> */}
+                    <button onClick={handleSubmitReview} disabled={submittingReview} className="px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors w-full sm:w-auto disabled:opacity-50" style={{ backgroundColor: theme.pr }}>
+              {submittingReview ? "Submitting..." : "Submit Review"}
+            </button>
                   </div>
                 </div>
               </div>
@@ -945,10 +1081,10 @@ const fetchRelatedProducts = async (category: string) => {
         </div>
       </section>
 
-      <section 
+      <section
         className="py-20 px-4"
-        style={{ 
-          backgroundImage: `linear-gradient(to bottom right, ${theme.pr}33, ${theme.se}33)` 
+        style={{
+          backgroundImage: `linear-gradient(to bottom right, ${theme.pr}33, ${theme.se}33)`,
         }}
       >
         <div className="max-w-7xl mx-auto">
@@ -978,16 +1114,23 @@ const fetchRelatedProducts = async (category: string) => {
                           alt={item.name}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                         />
-                        <div 
+                        <div
                           className="absolute top-4 right-4 bg-[#009395]/70 backdrop-blur-sm text-[#000000] text-xs px-2.5 py-1.5 rounded-full flex items-center space-x-1"
-                          style={{ backgroundColor: `${theme.pr}70`, color: theme.tx }}
+                          style={{
+                            backgroundColor: `${theme.pr}70`,
+                            color: theme.tx,
+                          }}
                         >
                           <Star className="w-3.5 h-3.5 text-yellow-400 fill-current" />
-                          <span className="font-semibold">{item.rating || 'N/A'}</span>
+                          <span className="font-semibold">
+                            {item.rating || "N/A"}
+                          </span>
                         </div>
-                        <div 
+                        <div
                           className="absolute inset-0 bg-linear-to-t from-[#009395]/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                          style={{ background: `linear-gradient(to top, ${theme.pr}60, transparent, transparent)` }}
+                          style={{
+                            background: `linear-gradient(to top, ${theme.pr}60, transparent, transparent)`,
+                          }}
                         />
                       </div>
 
@@ -996,8 +1139,10 @@ const fetchRelatedProducts = async (category: string) => {
                           {item.name}
                         </h3>
                         <div className="flex justify-between items-center">
-                          <div className="text-2xl font-bold">Rs. {item.price}</div>
-                          <button 
+                          <div className="text-2xl font-bold">
+                            Rs. {item.price}
+                          </div>
+                          <button
                             className="px-4 py-2 bg-white text-[#009395] rounded-full text-sm font-semibold hover:bg-gray-200 transition-all opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0"
                             style={{ color: theme.pr }}
                           >
@@ -1011,11 +1156,12 @@ const fetchRelatedProducts = async (category: string) => {
               ))}
             </div>
           ) : (
-            <p className="text-center text-lg">No similar products found in this category.</p>
+            <p className="text-center text-lg">
+              No similar products found in this category.
+            </p>
           )}
         </div>
       </section>
-
 
       {/* Footer */}
       <footer className="border-t border-white/10 py-16 px-4">
@@ -1034,7 +1180,8 @@ const fetchRelatedProducts = async (category: string) => {
                   <a
                     key={social}
                     href="#"
-                    className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-all">
+                    className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-all"
+                  >
                     <span className="sr-only">{social}</span>
                     <div className="w-5 h-5 bg-white/50 rounded-full" />
                   </a>
@@ -1063,7 +1210,8 @@ const fetchRelatedProducts = async (category: string) => {
                     <li key={link}>
                       <a
                         href="#"
-                        className={`text-[${theme.tx}] hover:text-[${theme.tx}] transition-colors text-sm`}>
+                        className={`text-[${theme.tx}] hover:text-[${theme.tx}] transition-colors text-sm`}
+                      >
                         {link}
                       </a>
                     </li>
@@ -1078,13 +1226,22 @@ const fetchRelatedProducts = async (category: string) => {
               © {new Date().getFullYear()} Khurshid Fans. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <a href="#" className={`hover:text-[${theme.tx}] transition-colors`}>
+              <a
+                href="#"
+                className={`hover:text-[${theme.tx}] transition-colors`}
+              >
                 Privacy
               </a>
-              <a href="#" className={`hover:text-[${theme.tx}] transition-colors`}>
+              <a
+                href="#"
+                className={`hover:text-[${theme.tx}] transition-colors`}
+              >
                 Terms
               </a>
-              <a href="#" className={`hover:text-[${theme.tx}] transition-colors`}>
+              <a
+                href="#"
+                className={`hover:text-[${theme.tx}] transition-colors`}
+              >
                 Cookies
               </a>
             </div>

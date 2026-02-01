@@ -82,7 +82,7 @@ export async function PUT(
     }
 
     const body = await req.json();
-    const { firstName, lastName, email, street, city, zipCode, stateProvince, country, phoneNumber, items, status } = body; 
+    const { firstName, lastName, email, street, city, zipCode, stateProvince, country, phoneNumber, items, status} = body; 
 
     // Validate status
     const validStatuses = ["PENDING", "CONFIRMED", "SHIPPED", "COMPLETED", "CANCELLED"];

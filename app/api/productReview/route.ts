@@ -63,16 +63,16 @@ export async function POST(req: Request) {
     }
 
     // Check user exists
-    const user = await prisma.user.findUnique({
-      where: { id: Number(userId) },
-    });
+    // const user = await prisma.user.findUnique({
+    //   where: { id: Number(userId) },
+    // });
 
-    if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized: Please login" },
-        { status: 401, headers: corsHeaders }
-      );
-    }
+    // if (!user) {
+    //   return NextResponse.json(
+    //     { error: "Unauthorized: Please login" },
+    //     { status: 401, headers: corsHeaders }
+    //   );
+    // }
 
     // Check product exists
     const product = await prisma.product.findUnique({

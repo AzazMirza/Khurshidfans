@@ -21,10 +21,10 @@ import {
   Lock,
 } from "lucide-react";
 import Link from "next/link";
-// import { redirect, useRouter } from "next/navigation";
-// import { fi } from "zod/v4/locales";
-// import { useCartStore } from "@/app/lib/cart-store";
-// import { set } from "zod";
+import { redirect, useRouter } from "next/navigation";
+import { fi } from "zod/v4/locales";
+import { useCartStore } from "@/app/lib/cart-store";
+import { set } from "zod";
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
 
@@ -93,7 +93,6 @@ export default function CheckoutPage() {
   const cartItemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [orderId, setOrderId] = useState<number | null>(null);
   const [isFocused, setIsFocused] = useState("");
-  
 
   const [theme, setTheme] = useState({
     pr: "#009395",
@@ -101,8 +100,6 @@ export default function CheckoutPage() {
     tx: "#000000",
     bg: "#eeeeee",
   });
-
-  const [paymentFormData, setPaymentFormData] = useState<Record<string, string> | null>(null);
 
   useEffect(() => {
     // Simulate API fetch
@@ -266,7 +263,7 @@ const shippingCost = totalQuantity > 3
   // Payment methods
   const paymentMethods: PaymentMethod[] = [
     // DON NOT REMOVE
-    { id: "credit", name: "Credit Card", type: "credit" },
+    // { id: "credit", name: "Credit Card", type: "credit" },
     { id: "cash", name: "cash", type: "cash" },
     { id: "bankTransfer", name: "Bank Transfer", type: "bankTransfer" },
     // { id: "apple", name: "Apple Pay", type: "apple" },
@@ -347,13 +344,12 @@ const shippingCost = totalQuantity > 3
     }
   };
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (step === "cart") {
       setStep("shipping");
     } else if (step === "shipping") {
       setStep("payment");
-    }
-     else if (step === "payment") {
+    } else if (step === "payment") {
       setIsProcessing(true);
 
       let userId: string | null = "";
@@ -361,27 +357,7 @@ const shippingCost = totalQuantity > 3
       let guestId: string | null = "";
       guestId = localStorage.getItem("guestId");
 
-      try {
-
-const orderData = {
-  amount: total,
-  itemName: 'Khurshid Fan Order',
-  customerEmail: shipping.email,
-  customerFirstName: shipping.firstName,
-  customerLastName: shipping.lastName,
-  phoneNumber: shipping.phone,
-  street: shipping.street,
-  city: shipping.city,
-  stateProvince: shipping.stateProvince,
-  country: shipping.country,
-  zipCode: shipping.zipCode,
-};
-
-// POST to /api/payfast and get back HTML → display it
-
-// if (response.ok) {
-
-      const res = await fetch(`/api/checkout`, {
+      fetch(`/api/checkout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -389,9 +365,9 @@ const orderData = {
         body: JSON.stringify({
           shippingMethod: selectedShipping,
           paymentMethod: selectedPayment,
-          itemName: 'cartItems[0]',
+          cartItems: cartItems,
           shipping: shipping,
-          customerEmail: shipping.email,
+          email: shipping.email,
           phoneNumber: shipping.phone,
           street: shipping.street,
           city: shipping.city,
@@ -399,72 +375,26 @@ const orderData = {
           zipCode: shipping.zipCode,
           country: shipping.country,
           paymentDetails: paymentDetails,
-          amount: total,
+          total: total,
           guestId: localStorage.getItem("guestId"),
           userId: localStorage.getItem("userId"),
-          customerFirstName: shipping.firstName,
-          customerLastName: shipping.lastName,
+          firstName: shipping.firstName,
+          lastName: shipping.lastName,
         }),
       })
-      const data = await res.json();
-
-          if (data.success && data.paymentFormData) {
-            console.log("Payment form data received:", data);
-      // ✅ Trigger auto-submit via state (see useEffect below)
-      setPaymentFormData(data.paymentFormData);
-      setOrderId(data.order.id);
-    } else {
-      alert("Checkout failed: " + (data.error || "Unknown error"));
-      setIsProcessing(false);
-    }
-
-    alert("Order placed successfully! Order ID: " + data.shippingMethod);
-    console.log(data.shippingMethod, "method");
-    if (data.paymentMethod === "credit" && data.success) {
-
-        const response = await fetch('/api/payfast', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(orderData),
+        .then((res) => res.json())
+        .then((res) => {
+          setOrderId(res.order.id);
+          console.log(res);
+          window.open(res.waLink, "_blank");
         });
-alert("Payment initialized successfully!");
-        if (response.ok) {
-          // Convert response to blob and open in same tab
-          const html = await response.text();
-          const blob = new Blob([html], { type: 'text/html' });
-          const url = URL.createObjectURL(blob);
-          window.location.href = url; // This loads the HTML page with auto-submit form
-        } else {
-          console.log('Payment initialization failed', response.statusText);
-          alert('Failed to initialize payment');
-        }
-      }
 
-  // }
-
-      // if (data.paymentFormData) {
-      //   // ✅ REDIRECT TO PAYFAST (not WhatsApp!)
-      //   window.location.href = data.paymentFormData;
-      // } else {
-      //   alert("Failed to create payment session");
-      //   setIsProcessing(false);
-      // }
-
-      if(data.success){
+      // Simulate payment processing
+      setTimeout(() => {
+        setIsProcessing(false);
         setStep("confirmation");
-      }
-
-          }
-        // }
-           catch (err) {
-      console.error(err);
-      alert("Payment Error.");
-      setIsProcessing(false);
+      }, 2000);
     }
-  }
-
-  
-
   };
 
   const handleBack = () => {
@@ -495,48 +425,14 @@ alert("Payment initialized successfully!");
     );
   };
 
-//   useEffect(() => {
-//   if (paymentFormData) {
-//     // Create form
-//     const form = document.createElement('form');
-//     form.method = 'POST';
-//     form.action = 'https://ipguat.apps.net.pk/Ecommerce/api/Transaction/PostTransaction';
-
-//     // Add hidden inputs
-//     Object.entries(paymentFormData).forEach(([name, value]) => {
-//       const input = document.createElement('input');
-//       input.type = 'hidden';
-//       input.name = name;
-//       input.value = String(value);
-//       form.appendChild(input);
-//     });
-
-//     // Submit
-//     document.body.appendChild(form);
-//     form.submit();
-//   }
-// }, [paymentFormData]);
-
-
-// useEffect(() => {
-//   if (paymentFormData) {
-//     const form = document.createElement('form');
-//     form.method = 'POST';
-//     form.action = 'https://ipguat.apps.net.pk/Ecommerce/api/Transaction/PostTransaction';
-
-//     Object.entries(paymentFormData).forEach(([name, value]) => {
-//       const input = document.createElement('input');
-//       input.type = 'hidden';
-//       input.name = name;
-//       input.value = String(value);
-//       form.appendChild(input);
-//     });
-
-//     document.body.appendChild(form);
-//     form.submit();
-//   }
-// }, [paymentFormData]);
-
+  // useEffect(() => {
+  //   // Safe because useEffect always runs after mount
+  //   const stored = localStorage.getItem("theme");
+  //   if (stored) {
+  //     setTheme(JSON.parse(stored));
+  //   }
+  // }, []);
+  // Validation: required fields must be non-empty (and trimmed)
   const isShippingFormValid = () => {
     return (
       shipping.phone.trim() !== "" &&
@@ -711,7 +607,7 @@ alert("Payment initialized successfully!");
                             style={{ backgroundColor: theme.pr + 80 }}
                           >
                             <div
-                              className="relative w-24 h-24 rounded-xl overflow-hidden p-2 mr-6 shrink-0 border"
+                              className="relative w-24 h-24 rounded-xl overflow-hidden p-2 mr-6 shrink-0 border-1"
                               style={{
                                 borderColor: theme.tx,
                                 backgroundColor: theme.bg + 80,
@@ -1295,7 +1191,7 @@ alert("Payment initialized successfully!");
 
                     {selectedPayment === "credit" && (
                       <>
-                        {/* <div className="space-y-6">
+                        <div className="space-y-6">
                           <h3 className="text-lg font-bold">
                             Credit Card Details
                           </h3>
@@ -1378,7 +1274,7 @@ alert("Payment initialized successfully!");
                               </div>
                             </div>
                           </div>
-                        </div> */}
+                        </div>
                         <div className="p-6 bg-linear-to-r from-cyan-600/20 to-purple-600/20 rounded-2xl border border-cyan-500/30">
                           <h3 className="font-bold mb-3 flex items-center">
                             <Shield className="w-5 h-5 mr-2 text-green-400" />
@@ -1453,7 +1349,7 @@ alert("Payment initialized successfully!");
                       </div>
                     </div>
 
-                    <div className="p-6 bg-linear-to-r from-cyan-600/20 to-purple-600/20 rounded-2xl border border-cyan-500/30">
+                    <div className="p-6 bg-gradient-to-r from-cyan-600/20 to-purple-600/20 rounded-2xl border border-cyan-500/30">
                       <h3 className="font-bold mb-2 flex items-center justify-center">
                         <Truck className="w-5 h-5 mr-2 text-cyan-400" />
                         Estimated Delivery

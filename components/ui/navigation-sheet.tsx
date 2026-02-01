@@ -96,7 +96,7 @@ export const NavigationSheet = () => {
 
           <Link href="#" className="link-underline font-medium" > Export Queries </Link>
         </nav>
-        <div className="mt-8 flex flex-col space-y-3">
+        {/* <div className="mt-8 flex flex-col space-y-3">
           <Button
             variant="outline"
             className="w-full rounded-full border-gray-300 hover:bg-[var(--nav-color)] dark:border-gray-700 dark:hover:bg-gray-800 
@@ -106,7 +106,7 @@ export const NavigationSheet = () => {
           <Button className="w-full rounded-full hover:text-[var(--nav-color)]">
             Sign Up
           </Button>
-        </div>
+        </div> */}
       </SheetContent>
     </Sheet>
   );

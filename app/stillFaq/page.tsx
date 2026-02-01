@@ -51,16 +51,57 @@ export default function FAQSection() {
   );
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
+  // ----- NEW STATE FOR FORM -----
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    subject: "",
+    message: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+
   const toggleFAQ = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
+  // ----- FORM HANDLERS -----
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setSuccess("");
+    setError("");
+
+    try {
+      const res = await fetch("/api/faq", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Something went wrong");
+
+      alert("Message sent successfully ✅");
+      setFormData({ firstName: "", lastName: "", subject: "", message: "" });
+    } catch (err: any) {
+      alert(err.message || "Something went wrong ❌");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="bg-[#f1f1f1] text-black min-h-screen">
-      {/* Navbar with same background */}
+      <Navbar />
 
-      {/* FAQ Section */}
-      <section className=" py-16 px-6 md:px-12">
+      <section className="py-16 px-6 md:px-12">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 mt-20">
           {/* Left Side */}
           <div>
@@ -98,9 +139,7 @@ export default function FAQSection() {
                     className="flex justify-between cursor-pointer items-center w-full text-left"
                   >
                     <h3 className="font-semibold text-lg">{faq.question}</h3>
-                    <span className="">
-                      {openIndex === index ? "−" : "+"}
-                    </span>
+                    <span>{openIndex === index ? "−" : "+"}</span>
                   </button>
                   {openIndex === index && (
                     <p className="text-gray-900 mt-2">{faq.answer}</p>
@@ -108,20 +147,17 @@ export default function FAQSection() {
                 </div>
               ))}
             </div>
-
-            {/* <button className="mt-6 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm cursor-pointer">
-              View all FAQs
-            </button> */}
           </div>
 
           {/* Right Side - Contact Form */}
           <div className="bg-[#009395] shadow-none rounded-2xl p-6">
-            <h3 className="text-xl font-semibold  text-white mb-2">Still have questions?</h3>
+            <h3 className="text-xl font-semibold text-white mb-2">Still have questions?</h3>
             <p className="text-white mb-6">
               Contact our support team and we'll get back to you as soon as possible.
             </p>
 
-            <form className="space-y-4">
+            {/* ----- FORM LINKED TO BACKEND ----- */}
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white mb-1">
@@ -129,8 +165,11 @@ export default function FAQSection() {
                   </label>
                   <input
                     type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
                     placeholder="Your name"
-                    className="w-full p-3 rounded-md text-black bg-white border border-gray-300 "
+                    className="w-full p-3 rounded-md text-black bg-white border border-gray-300"
                   />
                 </div>
                 <div>
@@ -139,8 +178,11 @@ export default function FAQSection() {
                   </label>
                   <input
                     type="email"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
                     placeholder="Your email"
-                    className="w-full p-3 rounded-md text-black bg-white border border-gray-300 "
+                    className="w-full p-3 rounded-md text-black bg-white border border-gray-300"
                   />
                 </div>
               </div>
@@ -151,8 +193,11 @@ export default function FAQSection() {
                 </label>
                 <input
                   type="text"
+                  name="subject"
+                  value={formData.subject}
+                  onChange={handleChange}
                   placeholder="How can we help you?"
-                  className="w-full p-3 rounded-md text-black bg-white border border-gray-300 "
+                  className="w-full p-3 rounded-md text-black bg-white border border-gray-300"
                 />
               </div>
 
@@ -161,21 +206,25 @@ export default function FAQSection() {
                   Message
                 </label>
                 <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
                   placeholder="Please provide as much detail as possible..."
                   rows={4}
-                  className="w-full p-3 rounded-md text-black bg-white border border-gray-300 "
+                  className="w-full p-3 rounded-md text-black bg-white border border-gray-300"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3 rounded-md bg-[var(--gold-btn-color)]  font-medium hover:bg-[var(--gold-btn-hover)] cursor-pointer"
+                className="w-full py-3 rounded-md bg-[var(--gold-btn-color)] font-medium hover:bg-[var(--gold-btn-hover)] cursor-pointer"
+                disabled={loading}
               >
-                Send Message
+                {loading ? "Sending..." : "Send Message"}
               </button>
             </form>
 
-            <p className="mt-6 text-white ">
+            <p className="mt-6 text-white">
               Prefer direct contact? Email us at{" "}
               <a
                 href="mailto:info@khurshidfans.com"

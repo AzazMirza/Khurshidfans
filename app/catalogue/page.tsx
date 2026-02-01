@@ -1445,7 +1445,7 @@ export  default  function ProductsCatalog() {
 
       <div className="flex gap-6">
         {/* Desktop Sidebar */}
-        <div className="hidden md:block w-64 flex-shrink-0">
+        <div className="hidden md:block w-64 shrink-0">
           <FilterSidebar />
         </div>
 
@@ -1501,7 +1501,7 @@ export  default  function ProductsCatalog() {
                   <CardHeader className="p-4 pb-2">
                     <div className="flex items-center gap-2 ">
                     <CardTitle className="text-xl line-clamp-1 w-full flex justify-between ">{product.name}
-                      {renderRating(product.rating)}
+                      {/* {renderRating(product.rating)} */}
 
           {(product.color).map((opt) => (
             <li
@@ -1543,13 +1543,13 @@ export  default  function ProductsCatalog() {
                       </span> */}
                     </div>
 
-                    <div className="mt-2 flex flex-wrap gap-1">
+                    {/* <div className="mt-2 flex flex-wrap gap-1">
                       {product.category.map((cat, idx) => (
                         <Badge key={idx} variant="secondary" className="text-[10px] px-2 py-0.5 bg-[#009395]/50">
                           {cleanCategory(cat)}
                         </Badge>
                       ))}
-                    </div>
+                    </div> */}
                   </CardContent>
 
                   <CardFooter className="p-4 pt-0">

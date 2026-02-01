@@ -13,5 +13,5 @@ export default function NavbarWrapper() {
     pathname.startsWith("/order");
 
   if (hideNavbar) return null;
-  return <Navbar quantity={0} />;
+  return <Navbar  />;
 }

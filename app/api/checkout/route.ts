@@ -1,7 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
+import { generatePayFastPaymentData } from "@/lib/payfast";
 import nodemailer from "nodemailer";
 import { prisma } from "@/lib/prisma";
-
+import { tr } from "zod/v4/locales";
+// import { POST as payment } from "@/app/api/payment/route";
+// import { createPayFastCheckout } from "@/lib/checkout";
 /* ====== CORS ====== */
 
 const corsHeaders = {
@@ -14,33 +17,53 @@ export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }
 
-/* ====== POST ====== */
 
+// /* ====== POST ====== */
 // export async function POST(req: Request) {
 //   try {
-//     const {
-//       userId,
-//       guestId,
-//       email,
-//       street,
-//       city,
-//       stateProvince,
-//       zipCode,
-//       country,
-//       phoneNumber,
-//       firstName,
-//       lastName,
-//       paymentMethod,
-//       shippingMethod,
-//     } = await req.json();
+// const {
+//   userId,
+//   guestId,
+//   customerEmail: email,
+//   customerFirstName: firstName,
+//   customerLastName: lastName,
+//   phoneNumber,
+//   paymentMethod,
+//   shippingMethod,
+//   shipping,
+//   amount,
+// } = await req.json();
 
-//     if (!userId && !guestId) {
+// // Safely extract shipping details
+// const shippingDetails = shipping || {};
+// const {
+//   street = null,
+//   city = null,
+//   stateProvince = null,
+//   zipCode = null,
+//   country = null,
+// } = shippingDetails;
+
+// // Now validate
+// if (!userId && !guestId) {
+//   return NextResponse.json({ error: "Missing userId or guestId" }, { status: 400, headers: corsHeaders });
+// }
+
+// if (!email || !street || !city || !stateProvince || !phoneNumber) {
+//   console.log("Validation failed. Values:", { email, street, city, stateProvince, phoneNumber });
+//   return NextResponse.json(
+//     { error: "Email, street, city, stateProvince and phoneNumber are required" },
+//     { status: 400, headers: corsHeaders }
+//   );
+// }
+
+// if (!userId && !guestId) {
 //       return NextResponse.json(
 //         { error: "Missing userId or guestId" },
 //         { status: 400, headers: corsHeaders }
 //       );
 //     }
-//     //  const address = `${street}, ${city}, ${stateProvince}, ${zipCode ?? ""}, ${country ?? ""}`;
+
 //     if (!email || !street || !city || !stateProvince || !phoneNumber) {
 //       return NextResponse.json(
 //         {
@@ -52,7 +75,6 @@ export async function OPTIONS() {
 //     }
 
 //     /* ====== FETCH CART ITEMS ====== */
-
 //     const cartItems = await prisma.cartItem.findMany({
 //       where: userId ? { userId } : { guestId },
 //       include: { product: true },
@@ -65,17 +87,37 @@ export async function OPTIONS() {
 //       );
 //     }
 
-//     /* ====== CALCULATE TOTAL ====== */
+//     /* ====== MERGE DUPLICATE CART ITEMS ====== */
+//     const mergedItems = Object.values(
+//       cartItems.reduce((acc: Record<string, any>, item) => {
+//         const key = `${item.productId}-${item.size ?? ""}-${item.color ?? ""}`;
+//         if (!acc[key]) {
+//           acc[key] = { ...item };
+//         } else {
+//           acc[key].quantity += item.quantity;
+//         }
+//         return acc;
+//       }, {})
+//     );
 
-//     const totalAmount = cartItems.reduce((sum, item) => {
-//       const price = item.product?.price ?? 0;
-//       return sum + price * item.quantity;
-//     }, 0);
+//     const totalAmount = mergedItems.reduce((sum, item) => {
+//   const price = typeof item.price === "number" ? item.price : 0;
+//   return sum + price * item.quantity;
+// }, 0);
+
+// let paymentResponse;
+
+// // ✅ Generate PayFast URL directly — same logic as /api/payment
+
+
+//   console.log("Payment Response:", paymentResponse);
 
 //     /* ====== CREATE ORDER ====== */
-
-//     const order = await prisma.order.create({
+// let order;
+// try {
+//     order = await prisma.order.create({
 //       data: {
+
 //         userId: userId || null,
 //         guestId: guestId || null,
 //         totalAmount,
@@ -90,13 +132,14 @@ export async function OPTIONS() {
 //         phoneNumber,
 //         paymentMethod,
 //         shippingMethod,
+//         paymentStatus: "PENDING",
 //         orderItems: {
-//           create: cartItems.map((item) => ({
+//           create: mergedItems.map((item) => ({
 //             productId: item.productId,
 //             quantity: item.quantity,
 //             size: item.size ?? null,
 //             color: item.color ?? null,
-//             price: item.product?.price ?? 0,
+//             price: item.price ?? 0,
 //           })),
 //         },
 //       },
@@ -106,19 +149,38 @@ export async function OPTIONS() {
 //         },
 //       },
 //     });
+//     console.log("✅ Order created bla bla:", order.id);
+// } catch (dbError) {
+//   console.error("💥 Database write failed:", dbError);
+//   throw new Error("Failed to save order to database");
+// }
 
-//     const orderId = order;
+//     const orderId = order.id;
 
-//     /* ====== WHATSAPP MESSAGE ====== */
 
-//     const waMessage = `Send to confirm your order!
+
+//       const paymentFormData = await generatePayFastPaymentData({
+//         amount: totalAmount,
+//         email: email,
+//         mobile: phoneNumber, // ← this is required!
+//         orderId: orderId.toString(),
+//         // item_name: "Order from Khurshid Fans",
+//         itemDescription: "Order from Khurshid Fans",
+//       });
+
+//       if (!paymentFormData) {
+//         throw new Error("Failed to generate PayFast URL");
+//       }
+
+
+//           /* ====== WHATSAPP MESSAGE ====== */
+//           const waMessage = `Send to confirm your order!
 //       Order ID: ${orderId}
 //       Name: ${firstName ?? ""} ${lastName ?? ""}
 //       Phone: ${phoneNumber}
 //       Payment Method: ${paymentMethod}
 //       Shipping Method: ${shippingMethod}
 //       Address: ${street}, ${city}, ${stateProvince}, ${country ?? ""}
-
 //       Total Amount: Rs. ${totalAmount}`;
 
 //     const waLink = `https://wa.me/923058491064?text=${encodeURIComponent(
@@ -126,13 +188,11 @@ export async function OPTIONS() {
 //     )}`;
 
 //     /* ====== CLEAR CART ====== */
-
 //     await prisma.cartItem.deleteMany({
 //       where: userId ? { userId } : { guestId },
 //     });
 
 //     /* ====== SEND EMAIL ====== */
-
 //     try {
 //       const transporter = nodemailer.createTransport({
 //         host: process.env.EMAIL_HOST,
@@ -158,21 +218,21 @@ export async function OPTIONS() {
 
 //         <h3>Order Items</h3>
 //         <ul>
-//           ${order.orderItems
-//             .map(
-//               (item) => `
-//             <li>
-//               ${item.product?.name ?? "Product"}<br/>
-//               Qty: ${item.quantity}<br/>
-//               Size: ${item.size ?? "—"}<br/>
-//               Color: ${item.color ?? "—"}<br/>
-//               Price: Rs. ${item.price}
-//             </li>
-//           `
-//             )
-//             .join("")}
+//         ${order.orderItems
+//           .map(
+//             (item) => `
+//           <li>
+//             ${item.product?.name ?? "Product"}<br/>
+//             Qty: ${item.quantity}<br/>
+//             Size: ${item.size ?? "—"}<br/>
+//             Color: ${item.color ?? "—"}<br/>
+//             Price: Rs. ${item.price}
+//           </li>
+//         `
+//           )
+//           .join("")}
 //         </ul>
-//       `;
+//         `;
 
 //       await transporter.sendMail({
 //         from: `"Khurshid Fans" <${process.env.EMAIL_USER}>`,
@@ -184,18 +244,28 @@ export async function OPTIONS() {
 //       console.error("Email sending failed:", emailError);
 //     }
 
-//     /* ====== RESPONSE ====== */
+//     console.log("✅ About to return paymentFormData:", JSON.stringify(paymentFormData, null, 2));
 
+    
+
+//     /* ====== RESPONSE ====== */
 //     return NextResponse.json(
 //       {
 //         success: true,
 //         message: "Checkout successful",
 //         order,
 //         waLink,
+//         paymentFormData,
+//         paymentMethod, 
 //       },
 //       { headers: corsHeaders }
 //     );
 //   } catch (error: any) {
+//   console.error("💥 Checkout Error:");
+//   console.error("Message:", error.message);
+//   console.error("Stack:", error.stack);
+//   console.error("Cause:", error.cause);
+
 //     console.error("Checkout Error:", error);
 //     return NextResponse.json(
 //       { error: error.message || "Checkout failed" },
@@ -204,25 +274,32 @@ export async function OPTIONS() {
 //   }
 // }
 
-/* ====== POST ====== */
 export async function POST(req: Request) {
   try {
     const {
       userId,
       guestId,
-      email,
-      street,
-      city,
-      stateProvince,
-      zipCode,
-      country,
+      customerEmail: email,
+      customerFirstName: firstName,
+      customerLastName: lastName,
       phoneNumber,
-      firstName,
-      lastName,
       paymentMethod,
       shippingMethod,
+      shipping,
+      amount,
     } = await req.json();
 
+    // Safely extract shipping details
+    const shippingDetails = shipping || {};
+    const {
+      street = null,
+      city = null,
+      stateProvince = null,
+      zipCode = null,
+      country = null,
+    } = shippingDetails;
+
+    // Validate input
     if (!userId && !guestId) {
       return NextResponse.json(
         { error: "Missing userId or guestId" },
@@ -231,6 +308,13 @@ export async function POST(req: Request) {
     }
 
     if (!email || !street || !city || !stateProvince || !phoneNumber) {
+      console.log("Validation failed. Values:", {
+        email,
+        street,
+        city,
+        stateProvince,
+        phoneNumber,
+      });
       return NextResponse.json(
         {
           error:
@@ -266,56 +350,80 @@ export async function POST(req: Request) {
       }, {})
     );
 
-    /* ====== CALCULATE TOTAL ====== */
-    // const totalAmount = mergedItems.reduce((sum, item) => {
-    //   const price = item.price ?? item.price ?? 0;
-    //   return sum + price * item.quantity;
-    // }, 0);
     const totalAmount = mergedItems.reduce((sum, item) => {
-  const price = typeof item.price === "number" ? item.price : 0;
-  return sum + price * item.quantity;
-}, 0);
+      const price = typeof item.price === "number" ? item.price : 0;
+      return sum + price * item.quantity;
+    }, 0);
 
+    /* ====== CREATE ORDER & CLEAR CART IN ONE TRANSACTION ====== */
+    let order;
+    try {
+      order = await prisma.$transaction(async (tx) => {
+        const createdOrder = await tx.order.create({
+          data: {
+            userId: userId || null,
+            guestId: guestId || null,
+            totalAmount,
+            firstName,
+            lastName,
+            email,
+            street,
+            city,
+            stateProvince,
+            zipCode: zipCode || null,
+            country: country || null,
+            phoneNumber,
+            paymentMethod,
+            shippingMethod,
+            paymentStatus: "PENDING",
+            orderItems: {
+              create: mergedItems.map((item) => ({
+                productId: item.productId,
+                quantity: item.quantity,
+                size: item.size ?? null,
+                color: item.color ?? null,
+                price: item.price ?? 0,
+              })),
+            },
+          },
+          include: {
+            orderItems: {
+              include: { product: true },
+            },
+          },
+        });
 
-    /* ====== CREATE ORDER ====== */
-    const order = await prisma.order.create({
-      data: {
-        userId: userId || null,
-        guestId: guestId || null,
-        totalAmount,
-        firstName,
-        lastName,
-        email,
-        street,
-        city,
-        stateProvince,
-        zipCode: zipCode || null,
-        country: country || null,
-        phoneNumber,
-        paymentMethod,
-        shippingMethod,
-        orderItems: {
-          create: mergedItems.map((item) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            size: item.size ?? null,
-            color: item.color ?? null,
-            price: item.price ?? 0,
-          })),
-        },
-      },
-      include: {
-        orderItems: {
-          include: { product: true },
-        },
-      },
-    });
+        // Clear cart in the same transaction
+        await tx.cartItem.deleteMany({
+          where: userId ? { userId } : { guestId },
+        });
+
+        return createdOrder;
+      });
+      console.log("✅ Order created:", order.id);
+    } catch (dbError) {
+      console.error("💥 Database write failed:", dbError);
+      throw new Error("Failed to save order to database");
+    }
 
     const orderId = order.id;
 
+    /* ====== GENERATE PAYFAST PAYMENT DATA ====== */
+    const paymentFormData = await generatePayFastPaymentData({
+      amount: totalAmount,
+      email,
+      mobile: phoneNumber,
+      orderId: orderId.toString(),
+      itemDescription: "Order from Khurshid Fans",
+    });
+
+    if (!paymentFormData) {
+      throw new Error("Failed to generate PayFast URL");
+    }
+
     /* ====== WHATSAPP MESSAGE ====== */
     const waMessage = `Send to confirm your order!
-Order ID: ${orderId}
+
 Name: ${firstName ?? ""} ${lastName ?? ""}
 Phone: ${phoneNumber}
 Payment Method: ${paymentMethod}
@@ -326,11 +434,6 @@ Total Amount: Rs. ${totalAmount}`;
     const waLink = `https://wa.me/923058491064?text=${encodeURIComponent(
       waMessage
     )}`;
-
-    /* ====== CLEAR CART ====== */
-    await prisma.cartItem.deleteMany({
-      where: userId ? { userId } : { guestId },
-    });
 
     /* ====== SEND EMAIL ====== */
     try {
@@ -361,14 +464,13 @@ Total Amount: Rs. ${totalAmount}`;
 ${order.orderItems
   .map(
     (item) => `
-  <li>
-    ${item.product?.name ?? "Product"}<br/>
-    Qty: ${item.quantity}<br/>
-    Size: ${item.size ?? "—"}<br/>
-    Color: ${item.color ?? "—"}<br/>
-    Price: Rs. ${item.price}
-  </li>
-`
+<li>
+  ${item.product?.name ?? "Product"}<br/>
+  Qty: ${item.quantity}<br/>
+  Size: ${item.size ?? "—"}<br/>
+  Color: ${item.color ?? "—"}<br/>
+  Price: Rs. ${item.price}
+</li>`
   )
   .join("")}
 </ul>
@@ -384,18 +486,25 @@ ${order.orderItems
       console.error("Email sending failed:", emailError);
     }
 
+    console.log(
+      "✅ About to return paymentFormData:",
+      JSON.stringify(paymentFormData, null, 2)
+    );
+
     /* ====== RESPONSE ====== */
     return NextResponse.json(
       {
         success: true,
-        message: "Checkout successful",
+        message: "Checkout successful...",
         order,
         waLink,
+        paymentFormData,
+        paymentMethod,
       },
       { headers: corsHeaders }
     );
   } catch (error: any) {
-    console.error("Checkout Error:", error);
+    console.error("💥 Checkout Error:", error);
     return NextResponse.json(
       { error: error.message || "Checkout failed" },
       { status: 500, headers: corsHeaders }
@@ -404,9 +513,8 @@ ${order.orderItems
 }
 
 
-
-
 /* ====== GET ====== */
+
 
 export async function GET(req: Request) {
   try {

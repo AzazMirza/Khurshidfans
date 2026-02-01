@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { PaymentStatus } from "@prisma/client";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -81,9 +82,68 @@ export async function GET(req: Request) {
 }
 
 
+export async function PUT(req: Request) {
+  try {
+    const { orderId, status, paymentStatus } = await req.json();
+
+    if (!orderId) {
+      return NextResponse.json(
+        { error: "Missing orderId" },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    // Validate order status
+    const validStatuses = ["PENDING", "CONFIRMED", "SHIPPED", "COMPLETED", "CANCELLED"];
+    if (status && !validStatuses.includes(status)) {
+      return NextResponse.json(
+        { error: "Invalid status" },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    // Validate paymentStatus if provided
+    const validPaymentStatuses = Object.values(PaymentStatus);
+    if (paymentStatus && !validPaymentStatuses.includes(paymentStatus)) {
+      return NextResponse.json(
+        { error: "Invalid paymentStatus" },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    const updatedOrder = await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        ...(status && { status }),
+        ...(paymentStatus && { paymentStatus }),
+      },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true, phone: true },
+        },
+        orderItems: {
+          include: { product: true },
+        },
+      },
+    });
+
+    return NextResponse.json(
+      {
+        message: `Order updated successfully`,
+        order: updatedOrder,
+      },
+      { status: 200, headers: corsHeaders }
+    );
+  } catch (error: any) {
+    console.error("Error updating order:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to update order" },
+      { status: 500, headers: corsHeaders }
+    );
+  }
+}
 
 
-// PUT → Update order status
 // export async function PUT(req: Request) {
 //   try {
 //     const { orderId, status } = await req.json();
@@ -91,7 +151,7 @@ export async function GET(req: Request) {
 //     if (!orderId || !status)
 //       return NextResponse.json({ error: "Missing orderId or status" }, { status: 400, headers: corsHeaders });
 
-//     const validStatuses = ["PENDING", "PROCESSING", "SHIPPED", "COMPLETED", "CANCELLED"];
+//     const validStatuses = ["PENDING", "CONFIRMED", "SHIPPED", "COMPLETED", "CANCELLED"];
 //     if (!validStatuses.includes(status))
 //       return NextResponse.json({ error: "Invalid status" }, { status: 400, headers: corsHeaders });
 
@@ -120,42 +180,3 @@ export async function GET(req: Request) {
 //     );
 //   }
 // }
-
-
-
-export async function PUT(req: Request) {
-  try {
-    const { orderId, status } = await req.json();
-
-    if (!orderId || !status)
-      return NextResponse.json({ error: "Missing orderId or status" }, { status: 400, headers: corsHeaders });
-
-    const validStatuses = ["PENDING", "CONFIRMED", "SHIPPED", "COMPLETED", "CANCELLED"];
-    if (!validStatuses.includes(status))
-      return NextResponse.json({ error: "Invalid status" }, { status: 400, headers: corsHeaders });
-
-    const updatedOrder = await prisma.order.update({
-      where: { id: orderId },
-      data: { status },
-      include: {
-        user: {
-          select: { id: true, name: true, email: true, phone: true },
-        },
-        orderItems: {
-          include: { product: true },
-        },
-      },
-    });
-
-    return NextResponse.json(
-      { message: `Order status updated to ${status}`, order: updatedOrder },
-      { status: 200, headers: corsHeaders }
-    );
-  } catch (error: any) {
-    console.error("Error updating order status:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to update status" },
-      { status: 500, headers: corsHeaders }
-    );
-  }
-}

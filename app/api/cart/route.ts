@@ -121,7 +121,7 @@ export async function GET(req: Request) {
       color: item.color,
       size: item.size,
       name: item.product.name,
-      price: item.product.price,
+      price: item.price,
       image: item.product.image,
       productId: item.product.id,
       sku: item.product.sku,
