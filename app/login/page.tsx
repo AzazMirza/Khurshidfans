@@ -15,6 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useRouter } from "next/navigation";
 
 // Allow login with email OR phone
 const formSchema = z.object({
@@ -39,7 +40,7 @@ const Login02Page = () => {
     },
     resolver: zodResolver(formSchema),
   });
-
+const router = useRouter();
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
       const res = await fetch("/api/login", {
@@ -56,7 +57,9 @@ const Login02Page = () => {
       }
 
       // Login successful — API already gave JWT cookie
-      window.location.href = "/dashboard";
+      // window.location.href = "/dashboard";
+      router.push("/dashboard");
+      router.refresh();
     } catch (err) {
       console.error("Login error:", err);
       alert("Something went wrong.");

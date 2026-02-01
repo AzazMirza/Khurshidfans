@@ -68,12 +68,12 @@ model ProductDetails {
 }
 
 model Order {
-  id             Int         @id @default(autoincrement())
+  id             Int           @id @default(autoincrement())
   userId         Int?
-  totalAmount    Int         @default(0)
-  status         OrderStatus @default(PENDING)
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  totalAmount    Int           @default(0)
+  status         OrderStatus   @default(PENDING)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @default(now()) @updatedAt
   guestId        String?
   phoneNumber    String?
   firstName      String?
@@ -104,7 +104,6 @@ model OrderItem {
   size      String?
   order     Order   @relation(fields: [orderId], references: [id])
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-
 }
 
 model CartItem {
@@ -151,6 +150,16 @@ model Theme {
   tx        String
   bg        String
   updatedAt DateTime @updatedAt
+}
+
+model Faq {
+  id        Int      @id @default(autoincrement())
+  firstName String
+  lastName  String
+  subject   String
+  message   String
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @db.Timestamp(6)
 }
 
 enum OrderStatus {

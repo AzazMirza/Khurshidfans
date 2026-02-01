@@ -40,14 +40,14 @@ export async function POST(req: Request) {
       }
 
       const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
-        expiresIn: "7d",
+        expiresIn: "1d",
       });
 
       const cookieStore = await cookies();
       cookieStore.set("session", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        maxAge: 7 * 24 * 60 * 60,
+        maxAge: 1 * 24 * 60 * 60,
         path: "/",
       });
 
@@ -84,14 +84,14 @@ export async function POST(req: Request) {
     const token = jwt.sign(
       { id: user.id, email: user.email, phone: user.phone },
       JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "1d" }
     );
 
     const cookieStore = await cookies();
     cookieStore.set("session", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 7 * 24 * 60 * 60,
+      maxAge: 1 * 24 * 60 * 60,
       path: "/",
     });
 

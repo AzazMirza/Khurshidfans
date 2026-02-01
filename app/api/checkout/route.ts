@@ -132,6 +132,7 @@ let paymentResponse;
         phoneNumber,
         paymentMethod,
         shippingMethod,
+        paymentStatus: "PENDING",
         orderItems: {
           create: mergedItems.map((item) => ({
             productId: item.productId,
