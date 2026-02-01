@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -10,11 +11,72 @@ import { MailIcon, MapPinIcon, MessageCircle, PhoneIcon } from "lucide-react";
 import Link from "next/link";
 import { BubbleBackground } from "./ui/bubble-background/bubble-background";
 
-const Contact02Page = () => (
-  // <BubbleBackground interactive>
-    <section id="contact" className="relative z-10 min-h-screen flex items-center justify-center py-16 ">
-      <div className="w-full  max-w-[\var(--breakpoint-xl)] mx-auto px-6 xl:px-0">
-        {/* <b className="text-black uppercase font-semibold text-sm">Contact Us</b> */}
+const Contact02Page = () => {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    message: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Basic validation
+    if (!formData.firstName || !formData.email || !formData.message) {
+      alert("⚠️ Please fill all required fields.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to send message");
+      }
+
+      // ✅ SUCCESS POPUP
+      alert("✅ Message sent successfully! We will contact you soon.");
+
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        message: "",
+      });
+    } catch (error: any) {
+      // ❌ ERROR POPUP
+      alert(`❌ Message failed: ${error.message || "Something went wrong"}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    // <BubbleBackground interactive>
+    <section
+      id="contact"
+      className="relative z-10 min-h-screen flex items-center justify-center py-16 "
+    >
+      <div className="w-full max-w-[\var(--breakpoint-xl)] mx-auto px-6 xl:px-0">
         <h2 className="mt-3 text-3xl justify-center text-center md:text-4xl xs:text-3xl font-bold tracking-tight text-black">
           Chat with our friendly team!
         </h2>
@@ -38,21 +100,22 @@ const Contact02Page = () => (
                 title: "Live chat",
                 desc: "Our friendly team is here to help.",
                 link: "https://wa.me/923096237788",
-                linkText: 
-                (
-                  <div className="">
-                    03096237788
-                  </div>
-                  ),
+                linkText: <div>03096237788</div>,
               },
               {
                 icon: <MapPinIcon className="w-6 h-6" />,
                 title: "Office",
+
                 desc: "Visit us at our office.",
                 link: "https://www.google.com/maps/place/Khurshid+Fans/@32.530334,74.090236,16z/data=!4m6!3m5!1s0x391f1b3a6e405615:0x33983c89be3f46b1!8m2!3d32.5297194!4d74.0920601!16s%2Fg%2F1tfw1f8g?hl=en&entry=ttu&g_ep=EgoyMDI1MDkxNy4wIKXMDSoASAFQAw%3D%3D",
+
+//                 desc: "Come say hello at our Office.",
+//                 link:
+//                   "https://www.google.com/maps/place/Khurshid+Fans",
+//  1e1172f (contact form edit)
                 linkText: (
                   <>
-                    SGS Electrical Company, GT Rd, Gujrat, 50700, Pakistan <br /> 
+                    SGS Electrical Company, GT Rd, Gujrat, Pakistan
                   </>
                 ),
               },
@@ -61,33 +124,22 @@ const Contact02Page = () => (
                 title: "Phone",
                 desc: "Sat-Thurs from 9am to 5pm.",
                 link: "tel:0533707903",
-                linkText: (
-                  <div className="">
-                    0533707903
-                  </div>
-                  ),
+                linkText: <div>0533707903</div>,
               },
             ].map((item, index) => (
               <div
                 key={index}
-                className="p-6 
-                   bg-[#009395] dark:bg-black/20 
-                  border border-white dark:border-white/10 
-                  rounded-2xl 
-                  backdrop-blur-lg 
-                  shadow-md 
-                  transition 
-                  hover:shadow-xl hover:scale-[1.02] 
-                  active:scale-[0.98] active:shadow-lg 
-                  duration-300 ease-in-out"
+                className="p-6 bg-[#009395] border border-white rounded-2xl shadow-md transition hover:shadow-xl"
               >
-                <div className="h-12 w-12 flex items-center justify-center  dark:bg-primary/20 text-white rounded-full transition-transform duration-300 hover:scale-110 hover:animate-bounce active:scale-110 active:animate-bounce focus-visible:animate-bounce">
+                <div className="h-12 w-12 flex items-center justify-center text-white rounded-full">
                   {item.icon}
                 </div>
-                <h3 className="mt-5 font-semibold text-2xl text-white">{item.title}</h3>
+                <h3 className="mt-5 font-semibold text-2xl text-white">
+                  {item.title}
+                </h3>
                 <p className="my-2.5 text-white">{item.desc}</p>
                 <Link
-                  className="font-medium text-white hover:text-(--gold-btn-color)"
+                  className="font-medium text-white"
                   href={item.link}
                   target={item.link.startsWith("http") ? "_blank" : undefined}
                 >
@@ -98,57 +150,66 @@ const Contact02Page = () => (
           </div>
 
           {/* Contact Form */}
-          <Card className=" bg-[#009395] shadow-none py-0">
+          <Card className="bg-[#009395] shadow-none py-0">
             <CardContent className="p-6 md:p-8">
-              <form>
+              <form onSubmit={handleSubmit}>
                 <div className="grid md:grid-cols-2 gap-x-8 gap-y-6">
-                  <div className="col-span-2 sm:col-span-1">
+                  <div>
                     <Label htmlFor="firstName">First Name</Label>
                     <Input
-                      placeholder="First name"
                       id="firstName"
-                      className="mt-2 bg-white h-10 shadow-none"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      className="mt-2 bg-white"
                     />
                   </div>
-                  <div className="col-span-2 sm:col-span-1">
+
+                  <div>
                     <Label htmlFor="lastName">Last Name</Label>
                     <Input
-                      placeholder="Last name"
                       id="lastName"
-                      className="mt-2 bg-white h-10 shadow-none"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      className="mt-2 bg-white"
                     />
                   </div>
+
                   <div className="col-span-2">
                     <Label htmlFor="email">Email</Label>
                     <Input
-                      type="email"
-                      placeholder="Email"
                       id="email"
-                      className="mt-2 bg-white h-10 shadow-none"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="mt-2 bg-white"
                     />
                   </div>
+
                   <div className="col-span-2">
                     <Label htmlFor="message">Message</Label>
                     <Textarea
                       id="message"
-                      placeholder="Message"
-                      className="mt-2 bg-white shadow-none"
                       rows={6}
+                      value={formData.message}
+                      onChange={handleChange}
+                      className="mt-2 bg-white"
                     />
                   </div>
+
                   <div className="col-span-2 flex items-center gap-2">
-                    <Checkbox id="acceptTerms" className="bg-background" />
-                    <Label htmlFor="acceptTerms" className="gap-0">
-                      You agree to our
-                      <Link href="#" className="underline ml-1 hover:text-white">
-                        terms and conditions
-                      </Link>
-                      <span>.</span>
+                    <Checkbox id="acceptTerms" />
+                    <Label htmlFor="acceptTerms">
+                      You agree to our terms and conditions
                     </Label>
                   </div>
                 </div>
-                <Button className="mt-6 w-full bg-white hover:bg-white/90 active:scale-[0.98] transition-transform duration-200" size="lg">
-                  Submit
+
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="mt-6 w-full bg-white"
+                >
+                  {loading ? "Sending..." : "Submit"}
                 </Button>
               </form>
             </CardContent>
@@ -156,8 +217,8 @@ const Contact02Page = () => (
         </div>
       </div>
     </section>
-  // </BubbleBackground>
-);
+    // </BubbleBackground>
+  );
+};
 
 export default Contact02Page;
-

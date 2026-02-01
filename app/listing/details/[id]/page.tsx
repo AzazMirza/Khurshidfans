@@ -87,17 +87,8 @@ useEffect(() => {
 
     // Set default size
     // const defaultSize = product.size?.[0] || '';
-<<<<<<< HEAD
-    const defaultSize = (
-  Array.isArray(product.size) 
-    ? product.size[0] 
-    : product.size
-) || '';
-    setSelectedSize(defaultSize);
-=======
     // const defaultSize = product.size ?? '';
     // setSelectedSize(defaultSize);
->>>>>>> dev-raees
   }
 }, [product]);
 
