@@ -67,7 +67,7 @@ export default function ProductDetail() {
     tx: "#000000",
     bg: "#eeeeee",
   });
-const [selectedSize, setSelectedSize] = useState<string>('');
+const [selectedSize, setSelectedSize] = useState<string | number>('');
 const [priceBySize, setPriceBySize] = useState<Record<string, number>>({});
 
 useEffect(() => {
@@ -85,7 +85,12 @@ useEffect(() => {
     setPriceBySize(priceMap);
 
     // Set default size
-    const defaultSize = product.size?.[0] || '';
+    // const defaultSize = product.size?.[0] || '';
+    const defaultSize = (
+  Array.isArray(product.size) 
+    ? product.size[0] 
+    : product.size
+) || '';
     setSelectedSize(defaultSize);
   }
 }, [product]);

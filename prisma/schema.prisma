@@ -86,8 +86,8 @@ model Order {
   stateProvince  String?
   zipCode        String?
   street         String?
-  paymentStatus  PaymentStatus @default(PENDING)
-  user           User?         @relation(fields: [userId], references: [id])
+  paymentStatus  PaymentStatus  @default(PENDING)
+  user           User?       @relation(fields: [userId], references: [id])
   orderItems     OrderItem[]
 
   @@index([userId])
@@ -176,3 +176,4 @@ enum PaymentStatus {
   FAILED
   REFUNDED
 }
+
