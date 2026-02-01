@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { User, columns } from "./columns";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Mail } from "lucide-react";
 import CuratedSidebar from '@/components/curatedsidebar';
 import { fetchFilteredUsers } from '@/app/lib/data';
@@ -37,9 +37,30 @@ export  function UsersTable({ searchParams }: UsersTableProps) {
     const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
   const totalPages = Number (searchParams?.totalPages) || 1;
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Fetch full dataset (up to 50–100 users for snappy client filtering)
-  const users  =  fetchFilteredUsers(query, currentPage,  totalPages);
+  // const users  =  fetchFilteredUsers(query, currentPage,  totalPages);
+    useEffect(() => {
+    // Reset loading when params change
+    setLoading(true);
+    
+    const fetchData = async () => {
+      try {
+        const data = await fetchFilteredUsers(query, currentPage, totalPages);
+        setUsers(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Failed to fetch users:', error);
+        setUsers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [query, currentPage, totalPages]); // ✅ Only re-fetch when these change
+
 
   // ✅ Guard against bad data
   const safeUsers = Array.isArray(users) ? users : [];

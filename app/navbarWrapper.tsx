@@ -13,5 +13,9 @@ export default function NavbarWrapper() {
     pathname.startsWith("/order");
 
   if (hideNavbar) return null;
+<<<<<<< HEAD
   return <Navbar />;
+=======
+  return <Navbar  />;
+>>>>>>> dev-azaz
 }

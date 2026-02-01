@@ -12,11 +12,16 @@ import Link from "next/link";
 import { BubbleBackground } from "./ui/bubble-background/bubble-background";
 
 const Contact02Page = () => {
+<<<<<<< HEAD
+=======
+  const [loading, setLoading] = useState(false);
+>>>>>>> dev-azaz
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     message: "",
+<<<<<<< HEAD
   });
 
   const [loading, setLoading] = useState(false);
@@ -25,14 +30,29 @@ const Contact02Page = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
+=======
+    acceptTerms: false,
+  });
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+>>>>>>> dev-azaz
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+<<<<<<< HEAD
     // Basic validation
     if (!formData.firstName || !formData.email || !formData.message) {
       alert("⚠️ Please fill all required fields.");
+=======
+    if (!formData.acceptTerms) {
+      alert("Please accept terms and conditions");
+>>>>>>> dev-azaz
       return;
     }
 
@@ -41,42 +61,64 @@ const Contact02Page = () => {
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
+<<<<<<< HEAD
         headers: {
           "Content-Type": "application/json",
         },
+=======
+        headers: { "Content-Type": "application/json" },
+>>>>>>> dev-azaz
         body: JSON.stringify(formData),
       });
 
       const data = await res.json();
 
+<<<<<<< HEAD
       if (!res.ok) {
         throw new Error(data.message || "Failed to send message");
       }
 
       // ✅ SUCCESS POPUP
       alert("✅ Message sent successfully! We will contact you soon.");
+=======
+      if (!res.ok) throw new Error(data.message);
+
+      alert("Message sent successfully ✅");
+>>>>>>> dev-azaz
 
       setFormData({
         firstName: "",
         lastName: "",
         email: "",
         message: "",
+<<<<<<< HEAD
       });
     } catch (error: any) {
       // ❌ ERROR POPUP
       alert(`❌ Message failed: ${error.message || "Something went wrong"}`);
+=======
+        acceptTerms: false,
+      });
+    } catch (error: any) {
+      alert(error.message || "Something went wrong ❌");
+>>>>>>> dev-azaz
     } finally {
       setLoading(false);
     }
   };
 
   return (
+<<<<<<< HEAD
     // <BubbleBackground interactive>
     <section
       id="contact"
       className="relative z-10 min-h-screen flex items-center justify-center py-16 "
     >
       <div className="w-full max-w-[\var(--breakpoint-xl)] mx-auto px-6 xl:px-0">
+=======
+    <section id="contact" className="relative z-10 min-h-screen flex items-center justify-center py-16 ">
+      <div className="w-full max-w-[var(--breakpoint-xl)] mx-auto px-6 xl:px-0">
+>>>>>>> dev-azaz
         <h2 className="mt-3 text-3xl justify-center text-center md:text-4xl xs:text-3xl font-bold tracking-tight text-black">
           Chat with our friendly team!
         </h2>
@@ -105,6 +147,7 @@ const Contact02Page = () => {
               {
                 icon: <MapPinIcon className="w-6 h-6" />,
                 title: "Office",
+<<<<<<< HEAD
 
                 desc: "Visit us at our office.",
                 link: "https://www.google.com/maps/place/Khurshid+Fans/@32.530334,74.090236,16z/data=!4m6!3m5!1s0x391f1b3a6e405615:0x33983c89be3f46b1!8m2!3d32.5297194!4d74.0920601!16s%2Fg%2F1tfw1f8g?hl=en&entry=ttu&g_ep=EgoyMDI1MDkxNy4wIKXMDSoASAFQAw%3D%3D",
@@ -113,6 +156,10 @@ const Contact02Page = () => {
 //                 link:
 //                   "https://www.google.com/maps/place/Khurshid+Fans",
 //  1e1172f (contact form edit)
+=======
+                desc: "Come say hello at our Office.",
+                link: "https://www.google.com/maps",
+>>>>>>> dev-azaz
                 linkText: (
                   <>
                     SGS Electrical Company, GT Rd, Gujrat, Pakistan
@@ -129,7 +176,11 @@ const Contact02Page = () => {
             ].map((item, index) => (
               <div
                 key={index}
+<<<<<<< HEAD
                 className="p-6 bg-[#009395] border border-white rounded-2xl shadow-md transition hover:shadow-xl"
+=======
+                className="p-6 bg-[#009395] border border-white rounded-2xl shadow-md"
+>>>>>>> dev-azaz
               >
                 <div className="h-12 w-12 flex items-center justify-center text-white rounded-full">
                   {item.icon}
@@ -141,7 +192,7 @@ const Contact02Page = () => {
                 <Link
                   className="font-medium text-white"
                   href={item.link}
-                  target={item.link.startsWith("http") ? "_blank" : undefined}
+                  target="_blank"
                 >
                   {item.linkText}
                 </Link>
@@ -160,7 +211,11 @@ const Contact02Page = () => {
                       id="firstName"
                       value={formData.firstName}
                       onChange={handleChange}
+<<<<<<< HEAD
                       className="mt-2 bg-white"
+=======
+                      className="mt-2 bg-white h-10"
+>>>>>>> dev-azaz
                     />
                   </div>
 
@@ -170,7 +225,11 @@ const Contact02Page = () => {
                       id="lastName"
                       value={formData.lastName}
                       onChange={handleChange}
+<<<<<<< HEAD
                       className="mt-2 bg-white"
+=======
+                      className="mt-2 bg-white h-10"
+>>>>>>> dev-azaz
                     />
                   </div>
 
@@ -181,7 +240,11 @@ const Contact02Page = () => {
                       type="email"
                       value={formData.email}
                       onChange={handleChange}
+<<<<<<< HEAD
                       className="mt-2 bg-white"
+=======
+                      className="mt-2 bg-white h-10"
+>>>>>>> dev-azaz
                     />
                   </div>
 
@@ -189,6 +252,12 @@ const Contact02Page = () => {
                     <Label htmlFor="message">Message</Label>
                     <Textarea
                       id="message"
+<<<<<<< HEAD
+=======
+                      value={formData.message}
+                      onChange={handleChange}
+                      className="mt-2 bg-white"
+>>>>>>> dev-azaz
                       rows={6}
                       value={formData.message}
                       onChange={handleChange}
@@ -197,17 +266,31 @@ const Contact02Page = () => {
                   </div>
 
                   <div className="col-span-2 flex items-center gap-2">
+<<<<<<< HEAD
                     <Checkbox id="acceptTerms" />
                     <Label htmlFor="acceptTerms">
                       You agree to our terms and conditions
                     </Label>
+=======
+                    <Checkbox
+                      checked={formData.acceptTerms}
+                      onCheckedChange={(v) =>
+                        setFormData((p) => ({ ...p, acceptTerms: !!v }))
+                      }
+                    />
+                    <Label>You agree to our terms and conditions.</Label>
+>>>>>>> dev-azaz
                   </div>
                 </div>
 
                 <Button
                   type="submit"
                   disabled={loading}
+<<<<<<< HEAD
                   className="mt-6 w-full bg-white"
+=======
+                  className="mt-6 w-full bg-white hover:bg-white/90"
+>>>>>>> dev-azaz
                 >
                   {loading ? "Sending..." : "Submit"}
                 </Button>
@@ -217,7 +300,10 @@ const Contact02Page = () => {
         </div>
       </div>
     </section>
+<<<<<<< HEAD
     // </BubbleBackground>
+=======
+>>>>>>> dev-azaz
   );
 };
 

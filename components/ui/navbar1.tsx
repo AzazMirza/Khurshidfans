@@ -161,14 +161,14 @@ const Navbar1 = ({
               </NavigationMenu>
             </div>
           </div>
-          <div className="flex gap-2">
+          {/* <div className="flex gap-2">
             <Button asChild variant="outline" size="sm">
               <a href={auth.login.url}>{auth.login.title}</a>
             </Button>
             <Button asChild size="sm">
               <a href={auth.signup.url}>{auth.signup.title}</a>
             </Button>
-          </div>
+          </div> */}
         </nav>
 
         {/* Mobile Menu */}
@@ -209,14 +209,14 @@ const Navbar1 = ({
                     {menu.map((item) => renderMobileMenuItem(item))}
                   </Accordion>
 
-                  <div className="flex flex-col gap-3 ">
+                  {/* <div className="flex flex-col gap-3 ">
                     <Button asChild variant="outline">
                       <a href={auth.login.url}>{auth.login.title}</a>
                     </Button>
                     <Button asChild>
                       <a href={auth.signup.url}>{auth.signup.title}</a>
                     </Button>
-                  </div>
+                  </div> */}
                 </div>
               </SheetContent>
             </Sheet>

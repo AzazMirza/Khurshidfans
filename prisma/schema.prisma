@@ -86,8 +86,13 @@ model Order {
   stateProvince  String?
   zipCode        String?
   street         String?
+<<<<<<< HEAD
   paymentStatus  PaymentStatus  @default(PENDING)
   user           User?       @relation(fields: [userId], references: [id])
+=======
+  paymentStatus  PaymentStatus @default(PENDING)
+  user           User?         @relation(fields: [userId], references: [id])
+>>>>>>> dev-azaz
   orderItems     OrderItem[]
 
   @@index([userId])
@@ -105,10 +110,13 @@ model OrderItem {
   order     Order   @relation(fields: [orderId], references: [id])
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
   @@unique([orderId, productId, size, color])
 >>>>>>> dev-raees
+=======
+>>>>>>> dev-azaz
 }
 
 model CartItem {
@@ -181,4 +189,7 @@ enum PaymentStatus {
   FAILED
   REFUNDED
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> dev-azaz
