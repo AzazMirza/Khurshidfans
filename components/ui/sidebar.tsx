@@ -262,11 +262,12 @@ function SidebarTrigger({
 
   return (
     <Button
+    
       data-sidebar="trigger"
       data-slot="sidebar-trigger"
       variant="ghost"
       size="icon"
-      className={cn("size-7","hover:cursor-pointer", className)}
+      className={cn("size-7","hover:cursor-pointer ","no-print", className)}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()

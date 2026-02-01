@@ -48,7 +48,7 @@ const Navbar04Page = () => {
   }, []);
 
   return (
-    <div className="bg-transparent ">
+    <div className="bg-transparent no-print">
       <nav
         className={`fixed top-10  inset-x-4 mx-auto  rounded-full border transition-all duration-500 ease-in-out z-50 ${
           scrolled

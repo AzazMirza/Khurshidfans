@@ -160,6 +160,9 @@ export default function CheckoutPage() {
       });
     });
 
+
+
+    
     // Cart items animation
     cartItemRefs.current.forEach((item, i) => {
       if (!item) return;
@@ -300,6 +303,7 @@ const shippingCost = totalQuantity > 3
     // refreshCart();  // reload UI
   }
 
+  
   async function decreaseQty(id: number) {
     const guestId = localStorage.getItem("guestId");
     const userId = localStorage.getItem("userId");
@@ -446,11 +450,40 @@ const shippingCost = totalQuantity > 3
       // Note: email is optional in your form
     );
   };
-  const handleEmptyCart = () => {
-  setCartItems([]); // If you store cart in state
-  // If you store in localStorage:
-  // localStorage.removeItem("cartItems");
-};
+  const handleEmptyCart = async () => {
+    try {
+
+const guestId = localStorage.getItem("guestId");
+const userId = localStorage.getItem("userId");
+
+// const id = userId ? userId : guestId;
+
+    // if (!guestId) {
+    //   alert("Guest ID not found!");
+    //   return;
+    // }
+
+      const res = await fetch('/api/clearCart', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body : JSON.stringify({ userId, guestId }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to empty cart");
+      }
+
+      // OPTIONAL: clear frontend cart state
+        setCartItems([]); // If you store cart in state
+
+      // alert(data.message);
+    } catch (error) {
+      console.error(error);
+      // alert("Something went wrong");
+    }
+  };
 
 
   if (isLoading) {
@@ -505,6 +538,10 @@ const shippingCost = totalQuantity > 3
           </div>
         </div>
       </nav> */}
+
+
+
+
 
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4">
@@ -732,6 +769,10 @@ const shippingCost = totalQuantity > 3
     <span>Proceed to Shipping</span>
     <ChevronRight className="w-5 h-5 ml-2" />
   </button>
+{/* --------------------------- */}
+
+
+
    <button
     onClick={handleEmptyCart}
     className="border-2  border-black text-black px-8 py-4 rounded-full font-semibold hover:bg-gray-200 transition-all flex items-center justify-center"
@@ -742,12 +783,17 @@ const shippingCost = totalQuantity > 3
   >
     Empty Cart
   </button>
+  
 </div>
 
                     </>
                   )}
                 </div>
               )}
+
+
+
+
 
               {step === "shipping" && (
                 <div ref={setStepRef(1)} className="space-y-8">
@@ -1557,5 +1603,20 @@ const shippingCost = totalQuantity > 3
         </div>
       </footer>
     </div>
+  );
+}
+
+
+export  function Checkout() {
+  const router = useRouter();
+  const { clearCart } = useCartStore(); // if you have this
+// -------------Api call button to clear cart
+  // ✅ PUT handleEmptyCart HERE
+
+  // ⬇️ your existing useEffect, useGSAP, logic, etc.
+  return (
+    <>
+      <CheckoutPage />
+    </>
   );
 }

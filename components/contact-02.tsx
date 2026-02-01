@@ -48,7 +48,7 @@ const Contact02Page = () => (
               {
                 icon: <MapPinIcon className="w-6 h-6" />,
                 title: "Office",
-                desc: "Come say hello at our Office.",
+                desc: "Visit us at our office.",
                 link: "https://www.google.com/maps/place/Khurshid+Fans/@32.530334,74.090236,16z/data=!4m6!3m5!1s0x391f1b3a6e405615:0x33983c89be3f46b1!8m2!3d32.5297194!4d74.0920601!16s%2Fg%2F1tfw1f8g?hl=en&entry=ttu&g_ep=EgoyMDI1MDkxNy4wIKXMDSoASAFQAw%3D%3D",
                 linkText: (
                   <>

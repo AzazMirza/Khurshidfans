@@ -49,6 +49,7 @@ interface OrderDetail {
   lastName: string | null;
   totalAmount: number;
   status: string;
+  paymentStatus: string;
   // address: string;
   street: string;
   city: string;
@@ -64,6 +65,7 @@ interface OrderDetail {
 
 interface OrderUpdateData {
   status: string;
+  paymentStatus: string;
 }
 
 export default function OrderDetailPage({
@@ -79,7 +81,7 @@ export default function OrderDetailPage({
   const [error, setError] = useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<OrderUpdateData>({
-    status: "",
+    status: "", paymentStatus: ""
   });
 
   useEffect(() => {
@@ -105,6 +107,7 @@ export default function OrderDetailPage({
 
         setEditingOrder({
           status: data.order.status || "",
+          paymentStatus: data.order.paymentStatus || ""
         });
       } catch (err) {
         console.error("Error fetching order:", err);
@@ -170,6 +173,7 @@ export default function OrderDetailPage({
       const payload = {
         orderId: parseInt(orderId, 10),
         status: editingOrder.status,
+        paymentStatus: editingOrder.paymentStatus
       };
 
       const res = await fetch(`/api/order`, {
@@ -205,6 +209,14 @@ export default function OrderDetailPage({
     return new URL(path, base).href;
   };
 
+  const [deliveryCharges, setDeliveryCharges] = useState(0);
+
+  useEffect(() => {
+    if (order) {
+      setDeliveryCharges(order.orderItems.length < 4 ? ((order.orderItems.length)*250) : 0)
+    }
+  }, [order]);
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -233,11 +245,19 @@ export default function OrderDetailPage({
             <div className="flex justify-between items-start mb-6">
               <h1 className="text-3xl font-bold">Order #{order.id}</h1>
 
-              <Button
-                variant="outline"
-                onClick={() => setIsEditDialogOpen(true)}>
-                Edit Status
-              </Button>
+             <div className="flex justify-between items-start mb-6">
+  {/* <h1 className="text-3xl font-bold"></h1> */}
+
+  <div className="flex gap-2 no-print">
+    <Button variant="outline" className="no-print" onClick={() => window.print()}>
+      Print
+    </Button>
+    <Button variant="outline" className="no-print" onClick={() => setIsEditDialogOpen(true)}>
+      Edit Status
+    </Button>
+  </div>
+</div>
+
             </div>
 
             {/* Order Summary */}
@@ -251,7 +271,13 @@ export default function OrderDetailPage({
                     <strong>Status:</strong> {order.status}
                   </p>
                   <p>
-                    <strong>Total:</strong> Rs. {order.totalAmount}
+                    <strong>SubTotal:</strong> Rs. {order.totalAmount}
+                  </p>
+                  <p>
+                    <strong>Delivery Charges:</strong> Rs. {deliveryCharges}
+                  </p>
+                  <p>
+                    <strong>Total:</strong> Rs. {order.totalAmount + deliveryCharges}
                   </p>
                   <p>
                     <strong>Date:</strong>{" "}
@@ -260,6 +286,10 @@ export default function OrderDetailPage({
                   <p>
                     <strong>Payment Method:</strong>{" "}
                     {order.paymentMethod.charAt(0).toUpperCase() + order.paymentMethod.slice(1)}
+                  </p>
+                  <p>
+                    <strong>Payment Status:</strong>{" "}
+                    {order.paymentStatus }
                   </p>
                 </CardContent>
               </Card>
@@ -302,7 +332,7 @@ export default function OrderDetailPage({
                       <div>
                         <p>{item.product.name}</p>
                         <p className="text-sm text-gray-500">
-                          Qty {item.quantity} × Rs.{item.price}
+                           {item.quantity} x {item.size}" : Rs.{item.price}
                         </p>
                       </div>
 
@@ -344,6 +374,20 @@ export default function OrderDetailPage({
                       <option value="SHIPPED">SHIPPED</option>
                       <option value="COMPLETED">COMPLETED</option>
                       <option value="CANCELLED">CANCELLED</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label>Payment</Label>
+                    <select
+                      name="paymentStatus"
+                      value={editingOrder.paymentStatus}
+                      onChange={handleInputChange}
+                      className="w-full border rounded p-2"
+                      required>
+                      <option value="PENDING">PENDING</option>
+                      <option value="PAID">PAID</option>
+                      <option value="FAILED">FAILED</option>
+                      <option value="REFUNDED">REFUNDED</option>
                     </select>
                   </div>
 

@@ -77,7 +77,7 @@ const Footer04Page = () => {
               {/* <Link href="#" target="_blank">
                 <TwitterIcon className="h-5 w-5 hover:text-[var(--gold-btn-color)]" />
               </Link> */}
-              <Link href="#" target="_blank">
+              <Link href="https://www.instagram.com/khurshidfans?igsh=eW9wNjFwbHdpdW8z" target="_blank">
                 <InstagramIcon className="h-5 w-5 hover:text-[var(--gold-btn-color)]" />
               </Link>
               <Link href="#" target="_blank">

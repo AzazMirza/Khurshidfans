@@ -1,4 +1,5 @@
 // lib/cart-store.ts
+
 import { create } from 'zustand';
 import { CartItem, CartStore } from '@/app/types';
 

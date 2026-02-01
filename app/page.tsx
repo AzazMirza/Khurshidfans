@@ -19,6 +19,7 @@ import CompanyProile from "./companyProile/page";
   export default async function HomePage() {
   return (
     <div className="">
+ 
       <Navbar  />
       <FeatureProducts />
       <Hero05 />    
@@ -39,6 +40,8 @@ import CompanyProile from "./companyProile/page";
       </BubbleBackground>
       <Footer />
       <BackToTopButton />
+      
     </div>
+    
   );
 }
