@@ -2,6 +2,7 @@
 
 import { use, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import Footer from "@/components/footer-04";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   Wind,
@@ -86,12 +87,17 @@ useEffect(() => {
 
     // Set default size
     // const defaultSize = product.size?.[0] || '';
+<<<<<<< HEAD
     const defaultSize = (
   Array.isArray(product.size) 
     ? product.size[0] 
     : product.size
 ) || '';
     setSelectedSize(defaultSize);
+=======
+    // const defaultSize = product.size ?? '';
+    // setSelectedSize(defaultSize);
+>>>>>>> dev-raees
   }
 }, [product]);
 
@@ -738,32 +744,59 @@ const fetchRelatedProducts = async (category: string) => {
 
                 {/* Technical Preview */}
                 <div className="space-y-8">
-                  <div
-                    ref={setFloatingRef(4)}
-                    className="p-6 rounded-2xl "
-                    style={{
-                      backgroundImage: `linear-gradient(to bottom right, ${theme.pr+33}, ${theme.se+33})`,
-                      
-                    }}
-                    >
-                    <h3 className="text-xl font-bold mb-4 flex items-center">
-                      <Award className="w-6 h-6 mr-2 " 
-                      style={{color:theme.pr}}
-                      />
-                      Award Winning Design
-                    </h3>
-                    <p className=" mb-4">
-                      Recognized with the 2025 Red Dot Design Award for
-                      exceptional innovation and user experience.
-                    </p>
-                    <div className="flex space-x-2">
-                      {[1, 2, 3].map((i) => (
-                        <div
-                          key={i}
-                          className="w-8 h-8 bg-white/20 rounded-lg"></div>
-                      ))}
-                    </div>
-                  </div>
+                
+
+<div
+  ref={setFloatingRef(4)}
+  className="p-6 rounded-2xl flex items-stretch gap-6"
+  style={{
+    backgroundImage: `linear-gradient(to bottom right, ${theme.pr + 33}, ${theme.se + 33})`,
+  }}
+>
+  {/* LEFT: Text Content (centered) */}
+  <div className="flex flex-col justify-center items-center text-center flex-1">
+    
+    <div className="flex items-center gap-3 mb-3">
+      {/* Small award icon */}
+      <Image
+        src="/images/Best Fan Company___c (1).png"
+        alt="Best Fan Company Award"
+        width={36}
+        height={36}
+        className="object-contain"
+      />
+
+      <h2 className="text-2xl -mt-4 text-center font-bold">
+       Recognized Excellence
+      </h2>
+    </div>
+
+    <p className="max-w-sm mt-4">
+    A mark of excellence reflecting our commitment to quality, innovation, and reliability.
+    </p>
+
+    {/* <div className="flex space-x-2 mt-4">
+      {[1, 2, 3].map((i) => (
+        <div
+          key={i}
+          className="w-8 h-8 bg-white/20 rounded-lg"
+        />
+      ))}
+    </div> */}
+  </div>
+
+  {/* RIGHT: Full Height Award Image */}
+  <div className="flex items-center justify-center">
+    <Image
+      src="/images/Award 2024.png"
+      alt="Award 2024"
+      width={60}
+      height={60}
+      className="h-full w-auto object-contain drop-shadow-xl"
+    />
+  </div>
+</div>
+
 
                   <div
                     ref={setFloatingRef(5)}
@@ -1023,7 +1056,7 @@ const fetchRelatedProducts = async (category: string) => {
 
 
       {/* Footer */}
-      <footer className="border-t border-white/10 py-16 px-4">
+      {/* <footer className="border-t border-white/10 py-16 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
             <div className="col-span-2">
@@ -1094,8 +1127,9 @@ const fetchRelatedProducts = async (category: string) => {
               </a>
             </div>
           </div>
-        </div>
-      </footer>
+        </div> */}
+      {/* </footer> */}
+       <Footer />
     </div>
   );
 }

@@ -19,9 +19,9 @@ import { ReactNode } from "react";
 
 export default function CuratedSidebar({ main }: { main: ReactNode }) {
   return (
-    <SidebarProvider>
-      <div className="flex w-full">
-        <Sidebar>
+    <SidebarProvider >
+      <div className="flex w-full ">
+        <Sidebar className="no-print">
           <SidebarHeader>
             <div className="px-4 py-2">
               <h2 className="text-lg font-semibold">Admin Dashboard</h2>

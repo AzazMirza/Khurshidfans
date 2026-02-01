@@ -33,7 +33,7 @@ const Footer04Page = () => {
               <a href="/" className="mx-auto sm:mx-0 flex justify-center lg:justify-start">
                 <img
                   className="h-13 w-25"
-                  src="images/khurshid fans logo.png"
+                  src="/images/khurshid fans logo.svg"
                   alt="Khurshid Fans Logo"
                 />
               </a>
@@ -64,7 +64,7 @@ const Footer04Page = () => {
           </div>
 
           <Separator />
-          <div className="py-8 flex flex-col-reverse sm:flex-row items-center justify-between gap-x-3 gap-y-5 px-6 xl:px-0">
+          <div className="py-8 flex  flex-col-reverse sm:flex-row items-center justify-between gap-x-3 gap-y-5 px-6 xl:px-0">
             <span className="text-white">
               &copy; {new Date().getFullYear()}{" "}
               <Link href="/" target="_blank">
@@ -73,17 +73,17 @@ const Footer04Page = () => {
               . All rights reserved.
             </span>
 
-            <div className="flex items-center gap-5 text-white ">
-              <Link href="#" target="_blank">
+            <div className="flex  items-center gap-5   text-white ">
+              {/* <Link href="#" target="_blank">
                 <TwitterIcon className="h-5 w-5 hover:text-[var(--gold-btn-color)]" />
-              </Link>
-              <Link href="#" target="_blank">
+              </Link> */}
+              <Link href="https://www.instagram.com/khurshidfans?igsh=eW9wNjFwbHdpdW8z" target="_blank">
                 <InstagramIcon className="h-5 w-5 hover:text-[var(--gold-btn-color)]" />
               </Link>
               <Link href="#" target="_blank">
                 <YoutubeIcon className="h-5 w-5 hover:text-[var(--gold-btn-color)]" />
               </Link>
-              <Link href="#" target="_blank">
+              <Link href="https://www.facebook.com/share/v/1CCGi5ePSs/" target="_blank">
                 <FacebookIcon className="h-5 w-5 hover:text-[var(--gold-btn-color)]" />
               </Link>
             </div>

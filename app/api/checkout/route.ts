@@ -178,7 +178,7 @@ let paymentResponse;
       Address: ${street}, ${city}, ${stateProvince}, ${country ?? ""}
       Total Amount: Rs. ${totalAmount}`;
 
-    const waLink = `https://wa.me/923058491064?text=${encodeURIComponent(
+    const waLink = `https://wa.me/923096237788?text=${encodeURIComponent(
       waMessage
     )}`;
 

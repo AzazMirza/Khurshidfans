@@ -22,7 +22,7 @@ export default async function ProductsPage(props: PageProps) {
   return (
     <CuratedSidebar
       main={
-        <main className="flex-1 p-6 bg-gray-50">
+        <main className="flex-1 p-6 bg-gray-50 ">
           <SidebarTrigger />
           <Suspense key={query + currentPage} fallback={<ProductsSkeleton />}>
             <ProductTable 

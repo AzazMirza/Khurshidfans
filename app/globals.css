@@ -201,3 +201,26 @@ body {
 
   /* Add any color name that appears in your product.color field */
 }
+
+@media print {
+  /* Hide sidebar */
+  aside,
+  nav,
+  .sidebar,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Remove padding/margins */
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Make cards look flat */
+  .card,
+  .shadow,
+  .shadow-md {
+    box-shadow: none !important;
+  }
+}

@@ -14,32 +14,32 @@ const faq = [
   {
     question: "What is your return policy?",
     answer:
-      "You can return unused items in their original packaging within 30 days for a refund or exchange. Contact support for assistance.",
+      ".",
   },
   {
     question: "How do I track my order?",
     answer:
-      "Track your order using the link provided in your confirmation email, or log into your account to view tracking details.",
+      "Once your order is dispatched, we will send you a tracking number. You can use it to track your order online and see where it is right now.",
   },
   {
     question: "Do you ship internationally?",
     answer:
-      "Yes, we ship worldwide. Shipping fees and delivery times vary by location, and customs duties may apply for some countries.",
+      ".",
   },
   {
     question: "What payment methods do you accept?",
     answer:
-      "We accept Visa, MasterCard, American Express, PayPal, Apple Pay, and Google Pay, ensuring secure payment options for all customers.",
+      "Cash on delivery is available, as well as advance payment before delivery through online payment methods such as Raast, bank transfer, and credit card.",
   },
   {
     question: "What if I receive a damaged item?",
     answer:
-      "Please contact our support team within 48 hours of delivery with photos of the damaged item. We’ll arrange a replacement or refund.",
+      "If the product arrives damaged, the company will replace it. Please contact customer support for more information.",
   },
   {
     question: "How can I contact customer support?",
     answer:
-      "You can reach our support team via email at support@example.com or through the live chat on our website. We're available 24/7 to assist you.",
+      " To contact customer support, you can call the number provided on your fan invoice. You may also reach us through the phone number listed on our website, or by emailing us at info@khurshidfans.com You can also contact us through the contact form on our website.",
   },
 ];
 
@@ -52,21 +52,21 @@ export default function FAQ() {
             Frequently Asked Questions
           </h2>
           <p className="mt-3 text-center text-gray-800 text-xl">
-            Quick answers to common questions about our products and services.
+           Everything you need to know about our products and services
           </p>
 
           <div className="min-h-[550px] md:min-h-[320px] xl:min-h-[300px]">
             <Accordion
-              type="single"
-              collapsible
-              className="mt-8 space-y-4 md:columns-2 gap-4 text-white"
-            >
+                type="single"
+                       collapsible
+                   className="mt-8 md:columns-2 text-white"
+>
               {faq.map(({ question, answer }, index) => (
                 <AccordionItem
-                  key={question}
-                  value={`question-${index}`}
-                  className=" bg-[#009395] py-1 px-4 rounded-xl border border-white "
-                >
+                        key={question}
+                             value={`question-${index}`}
+                 className="mb-4 break-inside-avoid bg-[#009395] py-1 px-4 rounded-xl border border-white"
+>
                   <AccordionPrimitive.Header className="flex">
                     <AccordionPrimitive.Trigger
                       className={cn(

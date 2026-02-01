@@ -21,9 +21,9 @@ export default function FeatureProducts() {
   };
 
   return (
-    <section className="">
+    <section className="z-10">
       {/* Outer container with background & shadow */}
-      <div className="bg-gray-100 p-8 md:p-12 lg:p-16">
+      <div className="bg-gray-100 p-8 md:p-12  lg:p-16">
         {/* Heading inside the background */}
         <h2 className="text-3xl font-bold text-center mb-10">
           Product Catagories

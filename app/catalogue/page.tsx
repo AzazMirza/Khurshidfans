@@ -230,7 +230,7 @@ import Image from 'next/image';
 import { Menu } from 'lucide-react';
 import Link  from 'next/link';
 
- 
+
 // Define types
 interface Product {
   id: number;
@@ -713,15 +713,15 @@ export  default  function ProductsCatalog() {
 
   </ul>
   <ul className={`space-y-2 border-2 border-input rounded-lg p-2           ${
-            filters.categories.includes("Padestal Fans")
+            filters.categories.includes("Pedestal Fans")
               ? "bg-primary/30 border-2 border-primary/70 text-primary shadow-sm"
               : "bg-background border border-input hover:bg-muted/60 hover:border-muted-foreground/30"
           }
 `}>
-    {/* Padestal Fans - Main Category */}
+    {/* Pedestal Fans - Main Category */}
     <li>
       <label
-        htmlFor="cat-Padestal Fans"
+        htmlFor="cat-Pedestal Fans"
         className={`
           flex items-center space-x-3 w-full p-3 rounded-lg cursor-pointer
           transition-all duration-200 ease-in-out 
@@ -729,32 +729,32 @@ export  default  function ProductsCatalog() {
         `}
       >
         <Checkbox
-          id="cat-Padestal Fans"
-          checked={filters.categories.includes("Padestal Fans")}
+          id="cat-Pedestal Fans"
+          checked={filters.categories.includes("Pedestal Fans")}
           onCheckedChange={(checked) => {
             if (checked) {
               setFilters((prev) => ({
                 ...prev,
-                categories: [...prev.categories, "Padestal Fans"],
+                categories: [...prev.categories, "Pedestal Fans"],
               }));
             } else {
               setFilters((prev) => ({
                 ...prev,
-                categories: prev.categories.filter((c) => c !== "Padestal Fans"),
+                categories: prev.categories.filter((c) => c !== "Pedestal Fans"),
               }));
             }
           }}
           className={`
             h-5 w-5 rounded border
             ${
-              filters.categories.includes("Padestal Fans")
+              filters.categories.includes("Pedestal Fans")
                 ? "border-primary bg-primary text-background"
                 : "border-input bg-background hover:border-primary"
             }
           `}
         />
         <span className="text-sm font-semibold">
-          Padestal Fans
+          Pedestal Fans
         </span>
       </label>
     {/* Eforce - Sub-brand or Variant */}
@@ -852,7 +852,7 @@ export  default  function ProductsCatalog() {
       </label>
     </li>
     {/* ----------------- */}
-    <li className='ml-4'>
+    {/* <li className='ml-4'>
       <label
         htmlFor="cat-Designer"
         className={`
@@ -895,7 +895,7 @@ export  default  function ProductsCatalog() {
           Designer Series
         </span>
       </label>
-    </li>
+    </li> */}
     {/* ----------------- */}
 
   </ul>
@@ -1086,7 +1086,7 @@ export  default  function ProductsCatalog() {
           `}
         />
         <span className="text-sm font-semibold">
-          False Ceiling Fans
+          False Ceiling Exhaust
         </span>
       </label>
     {/* Eforce - Sub-brand or Variant */}
@@ -1094,7 +1094,7 @@ export  default  function ProductsCatalog() {
 
     </li>
 
-    <li className='ml-4'>
+    {/* <li className='ml-4'>
       <label
         htmlFor="cat-2x2"
         className={`
@@ -1137,7 +1137,7 @@ export  default  function ProductsCatalog() {
           2'x 2' False Ceiling
         </span>
       </label>
-    </li>
+    </li> */}
     {/* ----------------- */}
 
     <li className='ml-4'>
@@ -1406,7 +1406,10 @@ export  default  function ProductsCatalog() {
 
 
   return (
+    
     <div className="px-5 mx-auto py-6 mt-20 "  >
+      
+
       <span className="flex justify-between flex-col md:flex-row items-start md:items-center">
       <h1 className="text-3xl font-bold mb-6">Products Catalog</h1>
 

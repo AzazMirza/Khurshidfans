@@ -48,9 +48,9 @@ const Navbar04Page = () => {
   }, []);
 
   return (
-    <div className="bg-transparent">
+    <div className="bg-transparent no-print">
       <nav
-        className={`fixed top-4 inset-x-4 mx-auto  rounded-full border transition-all duration-500 ease-in-out z-50 ${
+        className={`fixed top-10  inset-x-4 mx-auto  rounded-full border transition-all duration-500 ease-in-out z-50 ${
           scrolled
             ? 'h-16 max-w-[900px] border-white/30 shadow-xl backdrop-blur-md bg-[#009395]/80'
             : 'h-16 max-w-[1200px] border-transparent shadow-none backdrop-blur-0 bg-[#009395]'
